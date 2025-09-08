@@ -1,88 +1,77 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Switch, FlatList } from 'react-native';
-import { useHingeState } from '../../state/hingeState';
-import { HingeStatus } from '../components/HingeStatus';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { useRoute } from '@react-navigation/native';
+import { supabase } from '../../lib/supabaseClient';
+import { HingeEvent } from '../../types/types';
 
-interface DoorLog {
-  id: string;
-  action: 'open' | 'close';
-  status: 'locked' | 'unlocked';
-  timestamp: number;
-}
+type RouteParams = { doorId?: string };
 
-interface Props {
-  doorId: string;
-}
+export const HingeDetailScreen: React.FC = () => {
+  const route = useRoute<any>();
+  const doorId = (route.params as RouteParams)?.doorId ?? 'door_1';
 
-export const HingeDetailScreen: React.FC<Props> = ({ doorId }) => {
-  const doors = useHingeState((state) => state.doors);
-  const updateDoorStatus = useHingeState((state) => state.updateDoorStatus);
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLocked, setIsLocked] = useState(true);
-  const [logs, setLogs] = useState<DoorLog[]>([]);
+  const [events, setEvents] = useState<HingeEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const door = doors.find((d) => d.doorId === doorId);
-    if (door) {
-      setIsOpen(door.isOpen);
-      setIsLocked(door.isLocked);
-    }
-    // TODO: subscribe to real-time hinge events for this door
-  }, [doors, doorId]);
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('hinge_events')
+          .select('*')
+          .eq('door_id', doorId)
+          .order('timestamp', { ascending: false })
+          .limit(50);
 
-  function toggleOpen(value: boolean) {
-    setIsOpen(value);
-    updateDoorStatus(doorId, value, isLocked);
-    // TODO: Send command to hardware via API
-  }
+        if (error) {
+          console.warn('[hinge_events] detail load error:', error);
+          setEvents([]);
+        } else {
+          setEvents((data ?? []) as HingeEvent[]);
+        }
+      } catch (e) {
+        console.warn('HingeDetailScreen load failed:', e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [doorId]);
 
-  function toggleLock(value: boolean) {
-    setIsLocked(value);
-    updateDoorStatus(doorId, isOpen, value);
-    // TODO: Send command to hardware via API
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#22c55e" />
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Door {doorId} Control</Text>
-      <HingeStatus isOpen={isOpen} isLocked={isLocked} />
-
-      <View style={styles.toggleRow}>
-        <Text style={styles.label}>Open</Text>
-        <Switch value={isOpen} onValueChange={toggleOpen} />
-      </View>
-
-      <View style={styles.toggleRow}>
-        <Text style={styles.label}>Locked</Text>
-        <Switch value={isLocked} onValueChange={toggleLock} />
-      </View>
-
-      <Text style={styles.logsTitle}>Recent Activity</Text>
+      <Text style={styles.title}>Door: {doorId}</Text>
       <FlatList
-        data={logs}
-        keyExtractor={(item) => item.id}
+        data={events}
+        keyExtractor={(i, idx) => (i?.id != null ? String(i.id) : `idx-${idx}`)}
         renderItem={({ item }) => (
-          <Text style={styles.logItem}>
-            [{new Date(item.timestamp).toLocaleTimeString()}] Door was {item.action} and {item.status}
-          </Text>
+          <View style={styles.card}>
+            <Text style={styles.line}>
+              {(item.action || 'event').toUpperCase()} • {new Date(item.timestamp as any).toLocaleString()}
+            </Text>
+            {!!item.status && <Text style={styles.sub}>Status: {item.status}</Text>}
+          </View>
         )}
-        ListEmptyComponent={<Text>No recent activity</Text>}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        ListEmptyComponent={<Text style={styles.sub}>No events.</Text>}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#121212', padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#7FFF00', marginBottom: 12 },
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  label: { color: '#EEE', fontSize: 18 },
-  logsTitle: { marginTop: 20, fontWeight: 'bold', color: '#CCC', fontSize: 18 },
-  logItem: { color: '#AAA', marginBottom: 6, fontFamily: 'monospace' },
+  container: { flex: 1, backgroundColor: '#0b0b0f', padding: 16 },
+  title: { color: '#fff', fontSize: 18, fontWeight: '800', marginBottom: 12 },
+  card: { backgroundColor: '#16161a', borderRadius: 12, padding: 12, borderWidth: 1, borderColor: '#2a2a2a' },
+  line: { color: '#fff', fontWeight: '700' },
+  sub: { color: '#cfcfcf' },
 });
-// Placeholder for HingeDetailScreen.tsx
+
+export default HingeDetailScreen;

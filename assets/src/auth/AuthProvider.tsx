@@ -1,0 +1,29 @@
+﻿import React, { createContext, useContext, useMemo, useState } from 'react';
+
+type AuthContextType = {
+  isAuthed: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
+};
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [isAuthed, setIsAuthed] = useState(false);
+  const login = async (email: string, password: string) => {
+    if (!email || !password) throw new Error('Missing email or password');
+    await new Promise((r) => setTimeout(r, 300));
+    setIsAuthed(true);
+  };
+  const logout = () => setIsAuthed(false);
+  const value = useMemo(() => ({ isAuthed, login, logout }), [isAuthed]);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within <AuthProvider>');
+  return ctx;
+}
+
+

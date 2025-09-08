@@ -1,0 +1,13 @@
+﻿import React from 'react';
+import { View, ViewProps } from 'react-native';
+import { radii, shadows } from '../../theme/tokens';
+
+export default function GlassCard({ style, children, ...rest }: ViewProps) {
+  return (
+    <View {...rest} style={[{ backgroundColor: 'rgba(255,255,255,0.06)', borderRadius: radii.xl, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', padding: 16, ...shadows.card }, style]}>
+      {children}
+    </View>
+  );
+}
+
+

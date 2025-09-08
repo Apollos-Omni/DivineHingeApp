@@ -13,7 +13,7 @@ export const AvatarBadge: React.FC<Props> = ({ avatarUrl, karmaLevel, displayNam
   return (
     <View style={styles.container}>
       <Image
-        source={avatarUrl ? { uri: avatarUrl } : require('../../assets/icons/default-avatar.png')}
+        source={avatarUrl ? { uri: avatarUrl } : require('../../assets/backgrounds/images.png')}
         style={[styles.avatar, { borderColor: auraColor }]}
       />
       <Text style={styles.name}>{displayName}</Text>

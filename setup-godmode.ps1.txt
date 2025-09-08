@@ -1,0 +1,290 @@
+# setup-godmode.ps1
+# DivineHinge — UX/UI Pro Setup for Expo/React Native
+# Path: C:\Users\phelp\Documents\DivineHingeApp
+
+$ErrorActionPreference = "Stop"
+$projectPath = "C:\Users\phelp\Documents\DivineHingeApp"
+
+Write-Host "🔮 DivineHinge God-Mode setup starting..." -ForegroundColor Magenta
+if (-not (Test-Path $projectPath)) { throw "Project path not found: $projectPath" }
+Set-Location $projectPath
+
+# Ensure Node available
+if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) {
+  throw "Node.js not found. Install from https://nodejs.org and re-run."
+}
+
+# Helper: prefer .cmd to avoid PowerShell policy issues
+function Run-Npm { param([Parameter(Mandatory=$true)][string]$Args) cmd /c "npm $Args" }
+function Run-Npx { param([Parameter(Mandatory=$true)][string]$Args) cmd /c "npx $Args" }
+
+# -------- Install dependencies --------
+Write-Host "📦 Installing Expo RN core deps..."
+Run-Npx "expo install react-native-safe-area-context react-native-gesture-handler react-native-reanimated react-native-screens"
+Run-Npx "expo install expo-linear-gradient expo-blur expo-font expo-haptics"
+
+# Router & Navigation (use either; both can coexist)
+Write-Host "🧭 Installing Navigation & Router..."
+Run-Npm "install @react-navigation/native @react-navigation/native-stack"
+Run-Npm "install expo-router"
+
+# Tailwind (NativeWind) + utils
+Write-Host "🎨 Installing Tailwind/NativeWind..."
+Run-Npm "install nativewind tailwindcss clsx"
+Run-Npx "tailwindcss init -p"
+
+# -------- Write/Update config files --------
+
+# babel.config.js (reanimated plugin MUST be last)
+$babelPath = Join-Path $projectPath "babel.config.js"
+$babelConfig = @"
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      'nativewind/babel',
+      'react-native-reanimated/plugin', // keep last
+    ],
+  };
+};
+"@
+Set-Content -Path $babelPath -Value $babelConfig -Encoding UTF8
+Write-Host "✅ babel.config.js written."
+
+# tailwind.config.js with your palette
+$tailwindPath = Join-Path $projectPath "tailwind.config.js"
+$tailwindConfig = @"
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './App.{js,jsx,ts,tsx}',
+    './app/**/*.{js,jsx,ts,tsx}',
+    './src/**/*.{js,jsx,ts,tsx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#f6f5ff', 100: '#efebff', 200: '#ddd6fe', 300: '#c4b5fd',
+          400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+          800: '#5b21b6', 900: '#4c1d95'
+        },
+        ink: {
+          900: '#0b0b0f', 800: '#12121a', 700: '#1b1b26',
+          600: '#232333', 500: '#2c2c40', 400: '#3a3a55'
+        },
+        silver: {
+          50: '#f8f9fb', 100: '#f1f3f8', 200: '#e2e6f0', 300: '#cdd3e0',
+          400: '#b7bece', 500: '#9ca4b8', 600: '#7a8395', 700: '#5f697a'
+        }
+      },
+      borderRadius: {
+        '2xl': '1.25rem',
+        '3xl': '1.75rem',
+      },
+      boxShadow: {
+        halo: '0 0 32px rgba(139, 92, 246, 0.35)',
+        soft: '0 10px 30px rgba(0,0,0,0.25)'
+      }
+    }
+  },
+  plugins: [],
+}
+"@
+Set-Content -Path $tailwindPath -Value $tailwindConfig -Encoding UTF8
+Write-Host "✅ tailwind.config.js written."
+
+# -------- Create theme/components/screens skeletons --------
+
+# Directories
+$dirs = @(
+  "src\theme",
+  "src\ui\components",
+  "src\ui\navigation",
+  "src\ui\screens",
+  "src\ui\assets\doors"
+)
+foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $projectPath $d) | Out-Null }
+
+# Theme
+Set-Content -Path (Join-Path $projectPath "src\theme\colors.ts") -Encoding UTF8 -Value @"
+export const colors = {
+  bg: '#0b0b0f',
+  card: '#12121a',
+  cardAlt: '#1b1b26',
+  text: '#f1f3f8',
+  subText: '#b7bece',
+  primary: '#8b5cf6',
+  primaryAlt: '#6d28d9',
+  glow: 'rgba(139,92,246,0.35)'
+};
+"@
+Set-Content -Path (Join-Path $projectPath "src\theme\typography.ts") -Encoding UTF8 -Value @"
+export const typography = {
+  h1: { fontSize: 28, fontWeight: '800', letterSpacing: 0.5 },
+  h2: { fontSize: 22, fontWeight: '700' },
+  h3: { fontSize: 18, fontWeight: '700' },
+  body: { fontSize: 16, fontWeight: '500' },
+  caption: { fontSize: 12, opacity: 0.8 }
+};
+"@
+Set-Content -Path (Join-Path $projectPath "src\theme\index.ts") -Encoding UTF8 -Value @"
+export * from './colors';
+export * from './typography';
+"@
+
+# Components
+Set-Content -Path (Join-Path $projectPath "src\ui\components\Card.tsx") -Encoding UTF8 -Value @"
+import React from 'react';
+import { View, ViewProps } from 'react-native';
+
+export const Card: React.FC<ViewProps> = ({ style, children, ...props }) => (
+  <View
+    style={[{
+      backgroundColor: '#12121a',
+      borderRadius: 20,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOpacity: 0.25,
+      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 8,
+    }, style]}
+    {...props}
+  >
+    {children}
+  </View>
+);
+"@
+
+Set-Content -Path (Join-Path $projectPath "src\ui\components\DoorCard.tsx") -Encoding UTF8 -Value @"
+import React, { useCallback } from 'react';
+import { ImageBackground, Pressable, Text, View } from 'react-native';
+import Animated, { useSharedValue, withTiming, useAnimatedStyle, Easing, runOnJS } from 'react-native-reanimated';
+
+interface Props {
+  title: string;
+  image: any; // require('...')
+  onOpen: () => void;
+}
+
+export const DoorCard: React.FC<Props> = ({ title, image, onOpen }) => {
+  const scale = useSharedValue(1);
+  const openAnim = useSharedValue(0);
+
+  const onPress = useCallback(() => {
+    scale.value = withTiming(1.05, { duration: 160, easing: Easing.out(Easing.quad) }, () => {
+      openAnim.value = withTiming(1, { duration: 520, easing: Easing.inOut(Easing.cubic) }, () => runOnJS(onOpen)());
+    });
+  }, [onOpen]);
+
+  const rStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const doorStyle = useAnimatedStyle(() => ({ transform: [{ perspective: 600 }, { rotateY: `${-openAnim.value * 70}deg` }] }));
+
+  return (
+    <Pressable onPress={onPress} style={{ width: '100%' }}>
+      <Animated.View style={[{ borderRadius: 20, overflow: 'hidden' }, rStyle]}>
+        <View style={{ height: 140, backgroundColor: '#1b1b26' }}>
+          <Animated.View style={[{ flex: 1 }, doorStyle]}>
+            <ImageBackground source={image} resizeMode="cover" style={{ flex: 1, justifyContent: 'flex-end' }}>
+              <View style={{ backgroundColor: 'rgba(0,0,0,0.35)', padding: 12 }}>
+                <Text style={{ color: 'white', fontWeight: '800', fontSize: 18 }}>{title}</Text>
+              </View>
+            </ImageBackground>
+          </Animated.View>
+        </View>
+      </Animated.View>
+    </Pressable>
+  );
+};
+"@
+
+# Screens + Navigation
+Set-Content -Path (Join-Path $projectPath "src\ui\screens\HomeHallway.tsx") -Encoding UTF8 -Value @"
+import React from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import { DoorCard } from '../components/DoorCard';
+
+export const HomeHallway = ({ navigation }: any) => {
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#0b0b0f' }} contentContainerStyle={{ padding: 16 }}>
+      <Text style={{ color: 'white', fontSize: 28, fontWeight: '800', marginBottom: 12 }}>Welcome Home</Text>
+      <Text style={{ color: '#b7bece', marginBottom: 16 }}>Pick a door to continue.</Text>
+
+      <View style={{ gap: 14 }}>
+        <DoorCard title="Locks" image={require('../assets/doors/door1.jpg')} onOpen={() => navigation.navigate('Locks')} />
+        <DoorCard title="Schedules" image={require('../assets/doors/door2.jpg')} onOpen={() => navigation.navigate('Schedules')} />
+        <DoorCard title="Video" image={require('../assets/doors/door3.jpg')} onOpen={() => navigation.navigate('Video')} />
+      </View>
+    </ScrollView>
+  );
+};
+"@
+
+Set-Content -Path (Join-Path $projectPath "src\ui\navigation\AppNavigator.tsx") -Encoding UTF8 -Value @"
+import React from 'react';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HomeHallway } from '../screens/HomeHallway';
+import { View, Text } from 'react-native';
+
+const Stack = createNativeStackNavigator();
+
+const Screen = (title: string) => () => (
+  <View style={{ flex: 1, backgroundColor: '#0b0b0f', alignItems: 'center', justifyContent: 'center' }}>
+    <Text style={{ color: 'white', fontSize: 22, fontWeight: '700' }}>{title}</Text>
+  </View>
+);
+
+const navTheme = {
+  ...DefaultTheme,
+  colors: { ...DefaultTheme.colors, background: '#0b0b0f' }
+};
+
+export const AppNavigator = () => (
+  <NavigationContainer theme={navTheme}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade_from_bottom',
+        contentStyle: { backgroundColor: '#0b0b0f' },
+      }}
+    >
+      <Stack.Screen name='Home' component={HomeHallway} />
+      <Stack.Screen name='Locks' component={Screen('Locks')} />
+      <Stack.Screen name='Schedules' component={Screen('Schedules')} />
+      <Stack.Screen name='Video' component={Screen('Video')} />
+    </Stack.Navigator>
+  </NavigationContainer>
+);
+"@
+
+# Optional: create App.tsx backup and minimal wiring if file exists
+$appTsx = Join-Path $projectPath "App.tsx"
+if (Test-Path $appTsx) {
+  Copy-Item $appTsx "$appTsx.bak" -Force
+  Write-Host "🗂  Backed up App.tsx to App.tsx.bak"
+}
+Set-Content -Path $appTsx -Encoding UTF8 -Value @"
+import 'react-native-gesture-handler';
+import React from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AppNavigator } from './src/ui/navigation/AppNavigator';
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <StatusBar style='light' />
+      <AppNavigator />
+    </SafeAreaProvider>
+  );
+}
+"@
+Write-Host "✅ App.tsx wired to AppNavigator."
+
+# -------- Final hints --------
+Write-Host "📁 Add 3 door images at: src\\ui\\assets\\doors\\door1.jpg, door2.jpg, door3.jpg" -ForegroundColor Yellow
+Write-Host "🚀 Run the app:   cmd /c npx expo start" -ForegroundColor Green
+Write-Host "✨ Done. Enjoy the hallway magic." -ForegroundColor Magenta
