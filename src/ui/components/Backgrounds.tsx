@@ -1,8 +1,8 @@
 import React from "react";
 import { ImageBackground, StyleSheet, View } from "react-native";
-import Backgrounds from '../../lib/Backgrounds';
+import backgrounds from '../../lib/Backgrounds';
 
-export default function BackgroundScreen() {
+export default function backgroundScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground source={backgrounds.img42} style={styles.background}>

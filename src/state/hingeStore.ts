@@ -33,53 +33,67 @@ export const useHingeStore = create<HingeStore>()(
       selectedHingeId: null,
 
       setHingeStatus: (id, status) =>
-        set((state) => ({
-          hinges: {
-            ...state.hinges,
-            [id]: {
-              ...state.hinges[id],
-              status,
+        set((state) => {
+          const hinge = state.hinges[id];
+          if (!hinge) return {}; // No update if hinge doesn't exist
+          return {
+            hinges: {
+              ...state.hinges,
+              [id]: {
+                ...hinge,
+                status,
+              },
             },
-          },
-        })),
+          };
+        }),
 
       lockHinge: (id) =>
-        set((state) => ({
-          hinges: {
-            ...state.hinges,
-            [id]: {
-              ...state.hinges[id],
-              isLocked: true,
+        set((state) => {
+          const hinge = state.hinges[id];
+          if (!hinge) return {};
+          return {
+            hinges: {
+              ...state.hinges,
+              [id]: {
+                ...hinge,
+                isLocked: true,
+              },
             },
-          },
-        })),
+          };
+        }),
 
       unlockHinge: (id) =>
-        set((state) => ({
-          hinges: {
-            ...state.hinges,
-            [id]: {
-              ...state.hinges[id],
-              isLocked: false,
+        set((state) => {
+          const hinge = state.hinges[id];
+          if (!hinge) return {};
+          return {
+            hinges: {
+              ...state.hinges,
+              [id]: {
+                ...hinge,
+                isLocked: false,
+              },
             },
-          },
-        })),
+          };
+        }),
 
       setSelectedHinge: (id) => set({ selectedHingeId: id }),
 
       updateHingeTime: (id, type) =>
-        set((state) => ({
-          hinges: {
-            ...state.hinges,
-            [id]: {
-              ...state.hinges[id],
-              lastOpened:
-                type === 'opened' ? Date.now() : state.hinges[id].lastOpened,
-              lastClosed:
-                type === 'closed' ? Date.now() : state.hinges[id].lastClosed,
+        set((state) => {
+          const hinge = state.hinges[id];
+          if (!hinge) return {};
+          return {
+            hinges: {
+              ...state.hinges,
+              [id]: {
+                ...hinge,
+                lastOpened: type === 'opened' ? Date.now() : hinge.lastOpened,
+                lastClosed: type === 'closed' ? Date.now() : hinge.lastClosed,
+              },
             },
-          },
-        })),
+          };
+        }),
 
       loadHinges: (hinges) =>
         set(() => ({

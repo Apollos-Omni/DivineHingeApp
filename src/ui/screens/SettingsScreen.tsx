@@ -1,151 +1,132 @@
-import React, { useCallback, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
-import { useAuth } from "../../auth/AuthProvider";
-import GradientButton from "../components/common/GradientButton";
-// tokens live at src/ui/theme/tokens
-import { colors as _colors, radii as _radii } from "../../theme/tokens";
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput, Alert, ScrollView } from 'react-native';
+import { getProfile, updateProfile } from '../../services/functions';
 
-// Safe fallbacks if some tokens are missing
-const colors = {
-  bg: _colors?.bg ?? "#0b0b0f",
-  card: _colors?.card ?? "#16161a",
-  border: _colors?.border ?? "#2a2a2a",
-  text: _colors?.text ?? "#ffffff",
-  muted: _colors?.muted ?? "#9aa0a6",
-  accent: _colors?.accent ?? "#22c55e",
-  danger: _colors?.danger ?? "#ef4444",
-};
-const radii = {
-  m: _radii?.m ?? 12,
-  l: _radii?.l ?? 16,
-  xl: _radii?.xl ?? 20,
-};
-
-type RowProps = {
-  label: string;
-  description?: string;
-  right?: React.ReactNode;
-};
-const Row: React.FC<RowProps> = (props: RowProps) => {
-  const { label, description, right } = props;
-  return (
-    <View style={styles.row}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.rowLabel}>{label}</Text>
-        {description ? <Text style={styles.rowDesc}>{description}</Text> : null}
-      </View>
-      {right}
-    </View>
-  );
+type Profile = {
+  id?: string;
+  username?: string;
+  website?: string;
+  avatar_url?: string;
+  [k: string]: any;
 };
 
 const SettingsScreen: React.FC = () => {
-  // If your AuthProvider exposes signOut, this will work; otherwise it's a no-op.
-  const auth = useAuth() as unknown as { user?: any; signOut?: () => void };
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [username, setUsername] = useState('');
+  const [website, setWebsite] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
 
-  const [notifications, setNotifications] = useState(true);
-  const [biometrics, setBiometrics] = useState(false);
-  const [haptics, setHaptics] = useState(true);
+  async function load() {
+    setLoading(true);
+    try {
+      const { data, error } = await getProfile();
+      if (error) throw error;
+      // Expecting your Edge Function to return something like { profile: {...} } or just {...}
+      const p: Profile = (data?.profile ?? data ?? null) as any;
+      setProfile(p);
+      setUsername(p?.username ?? '');
+      setWebsite(p?.website ?? '');
+      setAvatarUrl(p?.avatar_url ?? '');
+    } catch (e: any) {
+      Alert.alert('Load failed', e?.message ?? 'Unable to load profile');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  const onSignOut = useCallback(() => {
-    if (auth?.signOut) auth.signOut();
-    else Alert.alert("Sign out", "No auth.signOut() found in provider.");
-  }, [auth]);
+  async function save() {
+    if (saving) return;
+    setSaving(true);
+    try {
+      const { data, error } = await updateProfile({ username: username.trim(), website: website.trim(), avatar_url: avatarUrl.trim() });
+      if (error) throw error;
+      Alert.alert('Saved', 'Profile updated via Edge Function');
+      // optional: refresh
+      await load();
+    } catch (e: any) {
+      Alert.alert('Save failed', e?.message ?? 'Unable to update profile');
+    } finally {
+      setSaving(false);
+    }
+  }
 
-  const onDeleteAccount = useCallback(() => {
-    Alert.alert(
-      "Delete account",
-      "This action is permanent. Continue?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => Alert.alert("Requested", "Account deletion requested.") },
-      ],
-      { cancelable: true }
+  useEffect(() => { load(); }, []);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#7FFF00" />
+        <Text style={{ color: '#cfcfcf', marginTop: 10 }}>Loading profile…</Text>
+      </View>
     );
-  }, []);
+  }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Settings</Text>
+      <Text style={styles.sub}>Backed by your Supabase Edge Function</Text>
 
-      {/* Account */}
       <View style={styles.card}>
-        <Text style={styles.section}>Account</Text>
-        <Row
-          label={auth?.user?.email ?? "Signed in"}
-          description={auth?.user ? "Tap Sign Out below to switch accounts." : "Not signed in"}
+        <Text style={styles.label}>Username</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Apollos"
+          placeholderTextColor="#8a8a8a"
+          value={username}
+          onChangeText={setUsername}
         />
-        <GradientButton title="Sign Out" onPress={onSignOut} />
+
+        <Text style={[styles.label, { marginTop: 12 }]}>Website</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="https://ourworld.example"
+          placeholderTextColor="#8a8a8a"
+          value={website}
+          onChangeText={setWebsite}
+          autoCapitalize="none"
+        />
+
+        <Text style={[styles.label, { marginTop: 12 }]}>Avatar URL</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="https://…"
+          placeholderTextColor="#8a8a8a"
+          value={avatarUrl}
+          onChangeText={setAvatarUrl}
+          autoCapitalize="none"
+        />
+
+        <TouchableOpacity style={[styles.btn, saving && styles.btnDisabled]} onPress={save} disabled={saving}>
+          <Text style={styles.btnText}>{saving ? 'Saving…' : 'Save Profile'}</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Preferences */}
       <View style={styles.card}>
-        <Text style={styles.section}>Preferences</Text>
-        <Row
-          label="Notifications"
-          description="Receive activity alerts"
-          right={
-            <Switch
-              value={notifications}
-              onValueChange={setNotifications}
-              trackColor={{ false: "#555", true: colors.accent }}
-            />
-          }
-        />
-        <View style={styles.divider} />
-        <Row
-          label="Biometric unlock"
-          description="Use Face/Touch ID where supported"
-          right={
-            <Switch
-              value={biometrics}
-              onValueChange={setBiometrics}
-              trackColor={{ false: "#555", true: colors.accent }}
-            />
-          }
-        />
-        <View style={styles.divider} />
-        <Row
-          label="Haptics"
-          description="Vibrate on interactions"
-          right={
-            <Switch
-              value={haptics}
-              onValueChange={setHaptics}
-              trackColor={{ false: "#555", true: colors.accent }}
-            />
-          }
-        />
+        <Text style={[styles.label, { marginBottom: 8 }]}>Raw Profile (debug)</Text>
+        <Text style={styles.json}>{JSON.stringify(profile, null, 2)}</Text>
       </View>
 
-      {/* Danger zone */}
-      <View style={[styles.card, { borderColor: colors.danger }]}>
-        <Text style={[styles.section, { color: colors.danger }]}>Danger Zone</Text>
-        <GradientButton title="Delete Account" onPress={onDeleteAccount} />
-      </View>
-
-      <View style={{ height: 24 }} />
+      <TouchableOpacity style={[styles.btn, { backgroundColor: '#333' }]} onPress={load}>
+        <Text style={[styles.btnText, { color: '#fff' }]}>Reload</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  title: { color: colors.text, fontSize: 22, fontWeight: "800", marginBottom: 12 },
-  section: { color: colors.text, fontSize: 14, fontWeight: "700", marginBottom: 12 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radii.xl,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: 16,
-  },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10 },
-  rowLabel: { color: colors.text, fontSize: 16, fontWeight: "700" },
-  rowDesc: { color: colors.muted, fontSize: 12, marginTop: 2 },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: 8 },
+  container: { backgroundColor: '#121212', padding: 16, flexGrow: 1 },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  title: { color: '#fff', fontSize: 22, fontWeight: '900' },
+  sub: { color: '#cfc5ff', marginTop: 6, marginBottom: 16 },
+  card: { backgroundColor: '#1a1624', borderRadius: 14, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: '#2a2a2a' },
+  label: { color: '#cfcfcf', fontWeight: '700', marginBottom: 6 },
+  input: { backgroundColor: '#1e1e1e', color: '#fff', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#2a2a2a' },
+  btn: { backgroundColor: '#7FFF00', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginTop: 16 },
+  btnDisabled: { opacity: 0.7 },
+  btnText: { color: '#121212', fontWeight: '900' },
+  json: { color: '#cfcfcf', fontFamily: 'monospace' as any, fontSize: 12 },
 });
 
 export default SettingsScreen;
-export { SettingsScreen }; // supports both `import X` and `import { X }`

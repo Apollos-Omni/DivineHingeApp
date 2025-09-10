@@ -1,118 +1,104 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useAuth } from '../../auth/AuthProvider';
+// /src/screens/LoginScreen.tsx
+import React, { useState } from "react";
+import { View, Text, Button, TextInput, ActivityIndicator, Alert } from "react-native";
+import * as WebBrowser from "expo-web-browser";
+import { supabase } from "../../lib/supabaseClient";
 
-export const LoginScreen: React.FC = () => {
-  const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+// Finish pending browser sessions (iOS/Android)
+WebBrowser.maybeCompleteAuthSession();
 
-  async function handleLogin() {
-    if (loading) return;
-    if (!email.trim() || !password) {
-      Alert.alert('Missing info', 'Please enter email and password.');
+// Hardcode the Snack redirect to avoid type mismatches.
+const redirectTo = "https://auth.expo.io/@apollosdesigns/divinehingeapp";
+
+export default function LoginScreen() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const signInWithGoogle = async () => {
+    try {
+      setBusy(true);
+      const authAny = (supabase as any).auth;
+
+      if (typeof authAny.signInWithOAuth === "function") {
+        // Supabase JS v2
+        const { error } = await authAny.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo },
+        });
+        if (error) throw error;
+      } else {
+        // Supabase JS v1
+        const { error } = await authAny.signIn(
+          { provider: "google" },
+          { redirectTo }
+        );
+        if (error) throw error;
+      }
+    } catch (e: any) {
+      Alert.alert("Google Sign-In Error", e?.message ?? String(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const signInWithMagicLink = async () => {
+    if (!email.trim()) {
+      Alert.alert("Missing email", "Enter your email to receive a sign-in link.");
       return;
     }
-
-    setLoading(true);
     try {
-      await login(email.trim(), password);
-      // ⛔️ Do NOT navigate here.
-      // RootNavigator/RootStack will re-render to the Home stack when user becomes truthy.
-    } catch (error) {
-      Alert.alert('Login Failed', (error as Error).message ?? 'Unknown error');
+      setBusy(true);
+      const authAny = (supabase as any).auth;
+
+      if (typeof authAny.signInWithOtp === "function") {
+        // Supabase JS v2
+        const { error } = await authAny.signInWithOtp({
+          email: email.trim(),
+          options: { emailRedirectTo: redirectTo },
+        });
+        if (error) throw error;
+      } else {
+        // Supabase JS v1
+        // v1 takes options as the second argument
+        const { error } = await authAny.signIn(
+          { email: email.trim() },
+          { redirectTo }
+        );
+        if (error) throw error;
+      }
+
+      Alert.alert("Check your email", "We sent you a login link.");
+    } catch (e: any) {
+      Alert.alert("Magic Link Error", e?.message ?? String(e));
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
-  }
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Divine Hinge Login</Text>
+    <View style={{ padding: 20, gap: 16, marginTop: 60 }}>
+      <Text style={{ fontSize: 24, fontWeight: "600" }}>DivineHingeApp Login</Text>
 
+      <Button title="Continue with Google" onPress={signInWithGoogle} disabled={busy} />
+
+      <View style={{ height: 1, backgroundColor: "#ddd", marginVertical: 12 }} />
+
+      <Text style={{ fontWeight: "500" }}>Or use a magic link:</Text>
       <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
-        keyboardType="email-address"
-        autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
-        autoComplete="email"
-        textContentType="emailAddress"
+        placeholder="you@example.com"
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={{ borderColor: "#bbb", borderWidth: 1, borderRadius: 8, padding: 12 }}
       />
+      <Button title="Send magic link" onPress={signInWithMagicLink} disabled={busy} />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-        autoComplete="password"
-        textContentType="password"
-      />
-
-      <TouchableOpacity
-        style={[styles.button, loading && styles.buttonDisabled]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>{loading ? 'Loading...' : 'Login'}</Text>
-      </TouchableOpacity>
-
-      {/* Register link — keep this, it’s fine */}
-      {/* Make sure your navigator has a "Register" screen in the auth stack */}
-      {/* and you're not attempting to navigate to "Home" here either */}
-      <TouchableOpacity onPress={() => {/* navigation handled by Auth stack; optional */}}>
-        <Text style={styles.registerText}>Don't have an account? Register here</Text>
-      </TouchableOpacity>
+      {busy && (
+        <View style={{ marginTop: 16 }}>
+          <ActivityIndicator />
+        </View>
+      )}
     </View>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 28,
-    color: '#7FFF00',
-    fontWeight: 'bold',
-    marginBottom: 32,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#222',
-    color: '#FFF',
-    padding: 14,
-    marginBottom: 16,
-    borderRadius: 8,
-  },
-  button: {
-    backgroundColor: '#7FFF00',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  buttonDisabled: {
-    backgroundColor: '#4B7F00',
-  },
-  buttonText: {
-    color: '#121212',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 16,
-  },
-  registerText: {
-    color: '#7FFF00',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 8,
-    textDecorationLine: 'underline',
-  },
-});
+}

@@ -1,72 +1,97 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { useDeviceState } from '../../state/deviceState';
-import { useActivityState } from '../../state/activityState';
+// src/ui/screens/DoorHubScreen.tsx
+import React, { useState, useCallback } from "react";
+import { FlatList, View, Text, Pressable } from "react-native";
+import DoorStatusSheet from "../components/sheets/DoorStatusSheet";
+import * as Haptics from "expo-haptics";
+// import { supabase } from "../../lib/supabaseClient"; // when you’re ready to call your RPC
 
-type Params = { doorId: string };
+type DoorCard = { id: string; name: string; status: "locked"|"unlocked"|"ajar" };
 
-export const DoorHubScreen: React.FC = () => {
-  const { params } = useRoute<any>();
-  const navigation = useNavigation();
-  const { devices, toggleLock } = useDeviceState();
-  const { add } = useActivityState();
-  const doorId = (params as Params)?.doorId;
-  const door = devices.find(d => d.id === doorId);
+const MOCK: DoorCard[] = [
+  { id: "A1", name: "Front", status: "locked" },
+  { id: "B2", name: "Garage", status: "ajar" },
+  { id: "C3", name: "Patio", status: "unlocked" },
+];
 
-  if (!door) {
-    return <View style={styles.container}><Text style={styles.title}>Door not found</Text></View>;
-  }
+export function DoorHubScreen() {
+  const [doors, setDoors] = useState(MOCK);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [active, setActive] = useState<DoorCard | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const onToggle = () => {
-    toggleLock(door.id);
-    add({ type: door.isLocked ? 'unlock':'lock', doorId: door.id, ts: Date.now(), note: `${door.isLocked ? 'Unlock' : 'Lock'} via Hub` });
-  };
+  const open = (d: DoorCard) => { setActive(d); setSheetOpen(true); };
+  const close = () => setSheetOpen(false);
+
+  const updateDoor = (id: string, status: DoorCard["status"]) =>
+    setDoors(prev => prev.map(d => d.id === id ? { ...d, status } : d));
+
+  // Replace these with real calls (RPC or table update) when ready
+  const doAction = useCallback(async (kind: "lock"|"unlock"|"toggle") => {
+    if (!active) return;
+    setBusy(true);
+    try {
+      // Example shape for later:
+      // const { error } = await supabase.rpc("hinge_do_action", { door_id: active.id, action: kind });
+      // if (error) throw error;
+      await new Promise(r => setTimeout(r, 650)); // simulate network
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      const next =
+        kind === "toggle"
+          ? (active.status === "locked" ? "unlocked" : "locked")
+          : (kind === "lock" ? "locked" : "unlocked");
+
+      updateDoor(active.id, next as DoorCard["status"]);
+      setActive(a => (a ? { ...a, status: next as DoorCard["status"] } : a));
+    } finally {
+      setBusy(false);
+    }
+  }, [active]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{door.name}</Text>
-      <Text style={styles.sub}>{door.isLocked ? 'Currently Locked' : 'Currently Unlocked'}</Text>
+    <View style={{ flex:1, padding:16 }}>
+      <Text style={{ color:"#fff", fontSize:20, fontWeight:"800", marginBottom:12 }}>Door Hub</Text>
 
-      <View style={styles.row}>
-        <TouchableOpacity style={[styles.cta, door.isLocked ? styles.ctaPrimary : styles.cta]} onPress={onToggle}>
-          <Text style={[styles.ctaText, door.isLocked ? { color:'#121212'} : {}]}>{door.isLocked ? 'Unlock' : 'Lock'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cta} onPress={()=>navigation.navigate('Schedules' as never, { doorId } as never)}>
-          <Text style={styles.ctaText}>Schedules</Text>
-        </TouchableOpacity>
-      </View>
+      <FlatList
+        data={doors}
+        keyExtractor={(d) => d.id}
+        ItemSeparatorComponent={() => <View style={{ height:10 }} />}
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => open(item)}
+            style={{
+              backgroundColor:"#12121a", borderRadius:14, padding:14, borderWidth:1, borderColor:"#2c2c40"
+            }}>
+            <View style={{ flexDirection:"row", justifyContent:"space-between", alignItems:"center" }}>
+              <Text style={{ color:"#f1f3f8", fontWeight:"700" }}>{item.name}</Text>
+              <StatusChip status={item.status} />
+            </View>
+            <Text style={{ color:"#b7bece", marginTop:6 }}>#{item.id}</Text>
+          </Pressable>
+        )}
+      />
 
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.tile} onPress={()=>navigation.navigate('RecordingSettings' as never)}>
-          <Text style={styles.tileTitle}>Recording</Text>
-          <Text style={styles.tileSub}>Clip length & motion</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tile} onPress={()=>navigation.navigate('Activity' as never)}>
-          <Text style={styles.tileTitle}>Activity</Text>
-          <Text style={styles.tileSub}>Recent events</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.row}>
-        <TouchableOpacity style={styles.tile} onPress={()=>navigation.navigate('Devices' as never)}>
-          <Text style={styles.tileTitle}>Rename/Remove</Text>
-          <Text style={styles.tileSub}>Manage this door</Text>
-        </TouchableOpacity>
-      </View>
+      <DoorStatusSheet
+        visible={sheetOpen}
+        onClose={close}
+        doorId={active?.id}
+        doorName={active?.name}
+        status={active?.status}
+        busy={busy}
+        onLock={() => doAction("lock")}
+        onUnlock={() => doAction("unlock")}
+        onToggle={() => doAction("toggle")}
+        speakFeedback
+      />
     </View>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container:{ flex:1, backgroundColor:'#121212', padding:16 },
-  title:{ color:'#fff', fontWeight:'900', fontSize:24, marginTop:8 },
-  sub:{ color:'#cfc5ff', marginTop:6, marginBottom:14 },
-  row:{ flexDirection:'row', gap:12, marginTop:10 },
-  cta:{ backgroundColor:'#2a2a2a', paddingVertical:12, paddingHorizontal:16, borderRadius:12 },
-  ctaPrimary:{ backgroundColor:'#7FFF00' },
-  ctaText:{ color:'#eee', fontWeight:'800' },
-  tile:{ flex:1, backgroundColor:'#1a1624', borderRadius:14, padding:14 },
-  tileTitle:{ color:'#fff', fontWeight:'800' },
-  tileSub:{ color:'#cfc5ff', marginTop:4 }
-});
+function StatusChip({ status }: { status: "locked"|"unlocked"|"ajar" }) {
+  const color = status === "locked" ? "#ef4444" : status === "unlocked" ? "#22c55e" : "#f59e0b";
+  return (
+    <View style={{ paddingHorizontal:10, paddingVertical:4, borderRadius:999, backgroundColor: color + "22", borderWidth:1, borderColor: color }}>
+      <Text style={{ color, fontWeight:"700", fontSize:12 }}>{status.toUpperCase()}</Text>
+    </View>
+  );
+}

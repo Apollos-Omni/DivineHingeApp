@@ -17,7 +17,7 @@ export default function HomeWorld2D() {
   const [activeDoor, setActiveDoor] = useState<Door | null>(null);
 
   // keep these in sync with HousePlan2D via a callback (we’ll add it)
-  const [playerPx, setPlayerPx] = useState({ x: 0, y: 0, r: 10 });
+  const [playerPx, setPlayerPx] = useState({ x: 0, y: 0, r: 10, width: 0, height: 0 });
 
   const onDoorTap = (door: Door) => { setActiveDoor(door); setSheetVisible(true); };
 

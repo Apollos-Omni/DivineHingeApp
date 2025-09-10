@@ -52,8 +52,11 @@ export default function GameMode() {
   }, []);
 
   // Game loop
-  useFrameCallback((frame) => {
-    const dt = Math.min(0.032, frame.timeSincePreviousFrame ? frame.timeSincePreviousFrame / 1000 : 0.016);
+  useFrameCallback((frameInfo) => {
+    const dt = Math.min(
+      0.032,
+      frameInfo.timeSincePreviousFrame != null ? frameInfo.timeSincePreviousFrame / 1000 : 0.016
+    );
 
     let ax = 0, ay = 0;
 

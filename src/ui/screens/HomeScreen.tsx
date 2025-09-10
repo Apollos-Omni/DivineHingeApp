@@ -1,26 +1,44 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useDeviceState } from '../../state/deviceState';
-import { useAuth } from '../../auth/AuthProvider';
 import { LinearGradient } from 'expo-linear-gradient';
 
+import { useDeviceState } from '../../state/deviceState';
+import { useAuth } from '../../auth/AuthProvider';
+import { getProfile /*, updateProfile*/ } from '../../services/functions';
+
 export const HomeScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>(); // or your typed RootStack param list
   const { devices, lockAll, unlockAll } = useDeviceState();
   const { logout } = useAuth();
 
+  // Optional: prove your Edge Function wiring works
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data, error } = await getProfile();
+        if (error) throw error;
+        // Shape depends on your function — adjust as needed
+        console.log('profiles-api data:', data);
+      } catch (e: any) {
+        console.warn('profiles-api failed:', e?.message ?? e);
+      }
+    })();
+  }, []);
+
+  const anyUnlocked = devices.some((d: { isLocked: any; }) => !d.isLocked);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <LinearGradient colors={['#0b0516', '#1f0f3a', '#5723a0']} start={{x:0,y:0}} end={{x:1,y:1}} style={styles.hero}>
+      <LinearGradient colors={['#0b0516', '#1f0f3a', '#5723a0']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
         <Text style={styles.brand}>DivineHinge</Text>
         <Text style={styles.brandSub}>Control the threshold. Unlock your destiny.</Text>
         <View style={styles.heroCtas}>
-          <TouchableOpacity style={[styles.cta, styles.ctaPrimary]} onPress={() => navigation.navigate('Devices' as never)}>
+          <TouchableOpacity style={[styles.cta, styles.ctaPrimary]} onPress={() => navigation.navigate('Devices')}>
             <Text style={[styles.ctaText, { color: '#121212' }]}>Add Device</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cta} onPress={() => (devices.some(d => !d.isLocked) ? lockAll() : unlockAll())}>
-            <Text style={styles.ctaText}>{devices.some(d => !d.isLocked) ? 'Lock All' : 'Unlock All'}</Text>
+          <TouchableOpacity style={styles.cta} onPress={() => (anyUnlocked ? lockAll() : unlockAll())}>
+            <Text style={styles.ctaText}>{anyUnlocked ? 'Lock All' : 'Unlock All'}</Text>
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -30,16 +48,18 @@ export const HomeScreen: React.FC = () => {
         <Text style={styles.panelSub}>
           {devices.length === 0
             ? 'No doors linked yet.'
-            : `${devices.length} door${devices.length>1?'s':''} • ${devices.filter(d=>d.isLocked).length} locked / ${devices.filter(d=>!d.isLocked).length} unlocked`}
+            : `${devices.length} door${devices.length > 1 ? 's' : ''} • ${devices.filter((d: { isLocked: any; }) => d.isLocked).length} locked / ${
+                devices.filter((d: { isLocked: any; }) => !d.isLocked).length
+              } unlocked`}
         </Text>
 
         <View style={styles.row}>
-          <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Devices' as never)}>
+          <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Devices')}>
             <Text style={styles.tileTitle}>Devices</Text>
             <Text style={styles.tileSub}>Add, rename, manage</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Settings' as never)}>
+          <TouchableOpacity style={styles.tile} onPress={() => navigation.navigate('Settings')}>
             <Text style={styles.tileTitle}>Settings</Text>
             <Text style={styles.tileSub}>Account & app</Text>
           </TouchableOpacity>
@@ -47,6 +67,11 @@ export const HomeScreen: React.FC = () => {
 
         <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
           <Text style={styles.logoutText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.tile, { marginTop: 12 }]} onPress={() => navigation.navigate('SuperResponder')}>
+          <Text style={styles.tileTitle}>Super Responder</Text>
+          <Text style={styles.tileSub}>Call Edge Function</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -70,5 +95,5 @@ const styles = StyleSheet.create({
   tileTitle: { color: '#fff', fontWeight: '800' },
   tileSub: { color: '#cfc5ff', marginTop: 4 },
   logoutBtn: { backgroundColor: '#ff5555', padding: 14, borderRadius: 12, marginTop: 20, alignItems: 'center' },
-  logoutText: { color: '#121212', fontWeight: '800' }
+  logoutText: { color: '#121212', fontWeight: '800' },
 });

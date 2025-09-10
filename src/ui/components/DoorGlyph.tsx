@@ -51,7 +51,7 @@ export default function DoorGlyph({ cx, cy, angle, width, thickness, status }: P
   }, [cx, cy, width, thickness]);
 
   return (
-    <G rotation={angle} origin={`${cx},${cy}`}>
+    <G rotation={angle} orgin={`${cx},${cy}`}>
       {/* glow */}
       <ACircle animatedProps={glowProps} cx={cx} cy={cy} fill={color} />
       {/* door bar */}

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useAvatarState } from '../../state/avatarState';
 
 export const AvatarScreen: React.FC = () => {
-  const avatar = useAvatarState((state) => state.avatar);
+  const avatar = useAvatarState((state: { avatar: any }) => state.avatar);
 
   if (!avatar) return <Text style={styles.empty}>No avatar loaded.</Text>;
 

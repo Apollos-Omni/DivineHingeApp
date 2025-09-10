@@ -46,7 +46,7 @@ export const backgrounds = {
 export const MyScreen = () => {
   return (
     <View style={styles.container}>
-      <ImageBackground source={Images} style={styles.background}>
+      <ImageBackground source={backgrounds.images} style={styles.background}>
         <Text style={styles.text}>Hello!</Text>
       </ImageBackground>
     </View>

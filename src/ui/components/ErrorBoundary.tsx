@@ -6,19 +6,19 @@ type Props = React.PropsWithChildren<{}>;
 type State = { error?: Error };
 
 export default class ErrorBoundary extends React.Component<Props, State> {
-  state: State = { error: undefined };
+  override state: State = { error: undefined };
 
   static getDerivedStateFromError(error: Error) {
     return { error };
   }
 
-  componentDidCatch(e: Error) {
+  override componentDidCatch(e: Error) {
     console.error("❌ Uncaught error:", e);
   }
 
   private reset = () => this.setState({ error: undefined });
 
-  render() {
+  override render() {
     const { error } = this.state;
 
     if (error) {

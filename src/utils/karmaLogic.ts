@@ -1,4 +1,5 @@
-import { useUserStore } from '../state/userStore';
+import { useUserStore } from 'assets/src/state/userStore';
+
 
 type KarmaAction =
   | 'vision_completed'
@@ -48,3 +49,5 @@ export const getKarmaColor = (karma: number): string => {
   if (karma > 50) return '#444';
   return '#999';
 };
+
+export default useUserStore;

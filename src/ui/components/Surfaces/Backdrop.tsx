@@ -6,7 +6,14 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-na
 export default function Backdrop() {
   const tilt = useSharedValue(0);
   const s = useAnimatedStyle(() => ({ transform: [{ translateY: tilt.value }] }));
-  React.useEffect(() => { tilt.value = withTiming(10, { duration: 1200 }); }, []);
+const startTilt = React.useCallback(() => {
+  tilt.value = withTiming(10, { duration: 1200 });
+}, [tilt]);
+
+React.useEffect(() => {
+  startTilt();
+}, [startTilt]);
+
   return (
     <View style={{ position:"absolute", inset:0 }}>
       <LinearGradient

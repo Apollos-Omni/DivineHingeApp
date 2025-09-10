@@ -1,10 +1,11 @@
+
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "target": "ES2020",
     "lib": ["ES2020"],
     "jsx": "react-native",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -15,18 +16,10 @@
     "resolveJsonModule": true,
 
     "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    },
+    "paths": { "@/*": ["src/*"] },
 
-    "types": ["react", "react-native", "jest"]
+    "types": ["react", "react-native", "@supabase/supabase-js"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "src/types/env.d.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "src/types/env.d.ts"],
+  "exclude": ["node_modules"]
 }

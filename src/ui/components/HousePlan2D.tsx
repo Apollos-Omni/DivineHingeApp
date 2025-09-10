@@ -82,19 +82,26 @@ export default function HousePlan2D({ layout, initialPos = {x:0.12, y:0.12}, onD
     px.value = clamped.x; py.value = clamped.y;
   });
 
-  const N2X = (nx:number) => nx * size.w;
-  const N2Y = (ny:number) => ny * size.h;
+// 1) Make N2X/N2Y stable so they can be safe deps
+const N2X = useCallback((nx: number) => nx * size.w, [size.w]);
+const N2Y = useCallback((ny: number) => ny * size.h, [size.h]);
 
-  // Emit pixel position for premium overlays (character sprite, badges, etc.)
-  useEffect(() => {
-    const id = setInterval(() => {
-      onPixelPositionChange?.({
-        x: N2X(px.value), y: N2Y(py.value), r: Math.min(N2X(0.02), N2Y(0.02)),
-        width: size.w, height: size.h
-      });
-    }, 50);
-    return () => clearInterval(id);
-  }, [size.w, size.h]);
+// 2) Make the pixel-position emitter stable
+const emitPixelPosition = useCallback(() => {
+  onPixelPositionChange?.({
+    x: N2X(px.value),
+    y: N2Y(py.value),
+    r: Math.min(N2X(0.02), N2Y(0.02)),
+    width: size.w,
+    height: size.h,
+  });
+}, [N2X, N2Y, onPixelPositionChange, size.w, size.h, px, py]);
+
+// 3) Use the stable emitter in an interval and include the right deps
+useEffect(() => {
+  const id = setInterval(emitPixelPosition, 50);
+  return () => clearInterval(id);
+}, [emitPixelPosition]);
 
   const playerStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: N2X(px.value - R) }, { translateY: N2Y(py.value - R) }],
@@ -129,13 +136,19 @@ export default function HousePlan2D({ layout, initialPos = {x:0.12, y:0.12}, onD
             >{r.name}</SvgText>
           </G>
         ))}
-        {layout.doors.map((d:Door) => (
-          <DoorGlyph
-            key={d.id}
-            cx={N2X(d.center.x)} cy={N2Y(d.center.y)}
-            angle={d.angle} width={N2X(d.width)} thickness={N2Y(d.thickness)}
-            status={d.status}
-          />
+      
+        {layout.doors.map((d: Door) => (
+          <G key={d.id}>
+            <DoorGlyph
+              cx={N2X(d.center.x)}
+              cy={N2Y(d.center.y)}
+              angle={d.angle}
+              width={N2X(d.width)}
+              thickness={N2Y(d.thickness)}
+              status={d.status}
+              // onPress={() => onDoorTap?.(d)} // if you support taps
+            />
+          </G>
         ))}
       </Svg>
 

@@ -15,8 +15,8 @@ type Props = {
 const DoorCard: React.FC<Props> = ({ name = 'Front Door', status = 'locked', onPress }) => {
   const color =
     status === 'locked' ? colors.danger :
-    status === 'unlocked' ? colors.accent :
-    colors.warning;
+    status === 'unlocked' ? colors.primary :
+    colors.warn;
 
   const scale = useSharedValue(1);
   const openAnim = useSharedValue(0);
@@ -48,10 +48,10 @@ const DoorCard: React.FC<Props> = ({ name = 'Front Door', status = 'locked', onP
           </View>
 
           <Animated.View
-            style={[{ marginTop: 10, width: 60, height: 6, backgroundColor: colors.border, borderRadius: 3 }, doorStyle]}
+            style={[{ marginTop: 10, width: 60, height: 6, backgroundColor: colors.line, borderRadius: 3 }, doorStyle]}
           />
 
-          <Text style={{ color: colors.muted, marginTop: 6 }}>Status: {status}</Text>
+          <Text style={{ color: colors.subtext, marginTop: 6 }}>Status: {status}</Text>
         </GlassCard>
       </Animated.View>
     </Pressable>
