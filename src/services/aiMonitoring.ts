@@ -1,4 +1,4 @@
-import { getUserKarmaLevel } from './karmaService';
+import { getUserKarmaLevel } from "./karmaService";
 
 export async function detectAnomalies(userId: string): Promise<boolean> {
   const karmaLevel = await getUserKarmaLevel(userId);

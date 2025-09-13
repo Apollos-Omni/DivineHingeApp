@@ -1,6 +1,6 @@
 // Temporary shim if your editor still can't "see" Session from supabase-js v2.
 // Remove this file once step A is fixed and the official type imports cleanly.
-declare module '@supabase/supabase-js' {
+{
   export interface UserIdentity {
     identity_id: string;
     provider: string;
@@ -31,7 +31,7 @@ declare module '@supabase/supabase-js' {
 
   export interface Session {
     access_token: string;
-    token_type: 'bearer';
+    token_type: "bearer";
     expires_in: number;
     expires_at?: number;
     refresh_token: string;

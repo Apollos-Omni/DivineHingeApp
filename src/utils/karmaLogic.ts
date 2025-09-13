@@ -1,17 +1,16 @@
-import { useUserStore } from 'assets/src/state/userStore';
-
+import { useUserStore } from "../state/userStore";
 
 type KarmaAction =
-  | 'vision_completed'
-  | 'vision_abandoned'
-  | 'comment_helpful'
-  | 'vote_cast'
-  | 'vote_ignored'
-  | 'hinge_unlocked'
-  | 'hinge_locked'
-  | 'reaction_positive'
-  | 'reaction_negative'
-  | 'legacy_impact';
+  | "vision_completed"
+  | "vision_abandoned"
+  | "comment_helpful"
+  | "vote_cast"
+  | "vote_ignored"
+  | "hinge_unlocked"
+  | "hinge_locked"
+  | "reaction_positive"
+  | "reaction_negative"
+  | "legacy_impact";
 
 const karmaWeights: Record<KarmaAction, number> = {
   vision_completed: 100,
@@ -33,21 +32,21 @@ export const applyKarma = (action: KarmaAction) => {
 };
 
 export const calculateKarmaBonus = (karma: number): string => {
-  if (karma > 10000) return 'Transcendent';
-  if (karma > 3000) return 'Legendary';
-  if (karma > 1000) return 'Ascended';
-  if (karma > 300) return 'Influential';
-  if (karma > 50) return 'Recognized';
-  return 'Seedling';
+  if (karma > 10000) return "Transcendent";
+  if (karma > 3000) return "Legendary";
+  if (karma > 1000) return "Ascended";
+  if (karma > 300) return "Influential";
+  if (karma > 50) return "Recognized";
+  return "Seedling";
 };
 
 export const getKarmaColor = (karma: number): string => {
-  if (karma > 10000) return '#DA00FF';
-  if (karma > 3000) return '#8B00FF';
-  if (karma > 1000) return '#5B00E3';
-  if (karma > 300) return '#4000A0';
-  if (karma > 50) return '#444';
-  return '#999';
+  if (karma > 10000) return "#DA00FF";
+  if (karma > 3000) return "#8B00FF";
+  if (karma > 1000) return "#5B00E3";
+  if (karma > 300) return "#4000A0";
+  if (karma > 50) return "#444";
+  return "#999";
 };
 
 export default useUserStore;

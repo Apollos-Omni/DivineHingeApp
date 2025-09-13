@@ -1,7 +1,6 @@
 // src/utils/id.ts
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export const generateId = (): string => uuidv4();
 
-export const generateTimestampId = (): string =>
-  `${Date.now()}-${uuidv4()}`;
+export const generateTimestampId = (): string => `${Date.now()}-${uuidv4()}`;

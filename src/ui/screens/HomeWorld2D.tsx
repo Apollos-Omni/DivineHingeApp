@@ -17,19 +17,40 @@ export default function HomeWorld2D() {
   const [activeDoor, setActiveDoor] = useState<Door | null>(null);
 
   // keep these in sync with HousePlan2D via a callback (we’ll add it)
-  const [playerPx, setPlayerPx] = useState({ x: 0, y: 0, r: 10, width: 0, height: 0 });
+  const [playerPx, setPlayerPx] = useState({
+    x: 0,
+    y: 0,
+    r: 10,
+    width: 0,
+    height: 0,
+  });
 
-  const onDoorTap = (door: Door) => { setActiveDoor(door); setSheetVisible(true); };
+  const onDoorTap = (door: Door) => {
+    setActiveDoor(door);
+    setSheetVisible(true);
+  };
 
   return (
-    <View style={{ flex:1, backgroundColor: colors.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <Backdrop />
-      <View style={{ paddingHorizontal:16, paddingTop:16, paddingBottom:8 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
         <T variant="title">Home Layout</T>
-        <T variant="subtitle">Tap doors for status • Press / drag anywhere to move</T>
+        <T variant="subtitle">
+          Tap doors for status • Press / drag anywhere to move
+        </T>
       </View>
 
-      <View style={{ flex:1, margin:12, borderRadius:16, overflow:"hidden", backgroundColor:"transparent", borderWidth:1, borderColor:"#222238" }}>
+      <View
+        style={{
+          flex: 1,
+          margin: 12,
+          borderRadius: 16,
+          overflow: "hidden",
+          backgroundColor: "transparent",
+          borderWidth: 1,
+          borderColor: "#222238",
+        }}
+      >
         <HousePlan2D
           layout={home}
           onDoorTap={onDoorTap}
@@ -38,7 +59,7 @@ export default function HomeWorld2D() {
         />
         {/* Premium overlays */}
         <Character x={playerPx.x} y={playerPx.y} r={Math.max(10, playerPx.r)} />
-        {home.doors.map(d => (
+        {home.doors.map((d) => (
           <DoorBadge
             key={d.id}
             x={playerPx.width ? d.center.x * playerPx.width : 0}
@@ -49,8 +70,12 @@ export default function HomeWorld2D() {
       </View>
 
       {/* Minimap */}
-      <View style={{ position:"absolute", right:16, top:16 }}>
-        <Minimap layout={home} px={(playerPx.width? playerPx.x/playerPx.width : 0)} py={(playerPx.height? playerPx.y/playerPx.height : 0)} />
+      <View style={{ position: "absolute", right: 16, top: 16 }}>
+        <Minimap
+          layout={home}
+          px={playerPx.width ? playerPx.x / playerPx.width : 0}
+          py={playerPx.height ? playerPx.y / playerPx.height : 0}
+        />
       </View>
 
       <DoorStatusSheet
@@ -60,12 +85,16 @@ export default function HomeWorld2D() {
         status={(activeDoor?.status ?? "locked") as any}
         onToggle={() => {
           if (!activeDoor) return;
-          setHome(curr => ({
+          setHome((curr) => ({
             ...curr,
-            doors: curr.doors.map(d => d.id === activeDoor.id
-              ? { ...d, status: d.status === "locked" ? "unlocked" : "locked" }
-              : d
-            )
+            doors: curr.doors.map((d) =>
+              d.id === activeDoor.id
+                ? {
+                    ...d,
+                    status: d.status === "locked" ? "unlocked" : "locked",
+                  }
+                : d,
+            ),
           }));
         }}
       />

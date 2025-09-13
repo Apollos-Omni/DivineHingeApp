@@ -1,6 +1,13 @@
 // /src/screens/LoginScreen.tsx
 import React, { useState } from "react";
-import { View, Text, Button, TextInput, ActivityIndicator, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Button,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -30,7 +37,7 @@ export default function LoginScreen() {
         // Supabase JS v1
         const { error } = await authAny.signIn(
           { provider: "google" },
-          { redirectTo }
+          { redirectTo },
         );
         if (error) throw error;
       }
@@ -43,7 +50,10 @@ export default function LoginScreen() {
 
   const signInWithMagicLink = async () => {
     if (!email.trim()) {
-      Alert.alert("Missing email", "Enter your email to receive a sign-in link.");
+      Alert.alert(
+        "Missing email",
+        "Enter your email to receive a sign-in link.",
+      );
       return;
     }
     try {
@@ -62,7 +72,7 @@ export default function LoginScreen() {
         // v1 takes options as the second argument
         const { error } = await authAny.signIn(
           { email: email.trim() },
-          { redirectTo }
+          { redirectTo },
         );
         if (error) throw error;
       }
@@ -77,11 +87,19 @@ export default function LoginScreen() {
 
   return (
     <View style={{ padding: 20, gap: 16, marginTop: 60 }}>
-      <Text style={{ fontSize: 24, fontWeight: "600" }}>DivineHingeApp Login</Text>
+      <Text style={{ fontSize: 24, fontWeight: "600" }}>
+        DivineHingeApp Login
+      </Text>
 
-      <Button title="Continue with Google" onPress={signInWithGoogle} disabled={busy} />
+      <Button
+        title="Continue with Google"
+        onPress={signInWithGoogle}
+        disabled={busy}
+      />
 
-      <View style={{ height: 1, backgroundColor: "#ddd", marginVertical: 12 }} />
+      <View
+        style={{ height: 1, backgroundColor: "#ddd", marginVertical: 12 }}
+      />
 
       <Text style={{ fontWeight: "500" }}>Or use a magic link:</Text>
       <TextInput
@@ -90,9 +108,18 @@ export default function LoginScreen() {
         placeholder="you@example.com"
         autoCapitalize="none"
         keyboardType="email-address"
-        style={{ borderColor: "#bbb", borderWidth: 1, borderRadius: 8, padding: 12 }}
+        style={{
+          borderColor: "#bbb",
+          borderWidth: 1,
+          borderRadius: 8,
+          padding: 12,
+        }}
       />
-      <Button title="Send magic link" onPress={signInWithMagicLink} disabled={busy} />
+      <Button
+        title="Send magic link"
+        onPress={signInWithMagicLink}
+        disabled={busy}
+      />
 
       {busy && (
         <View style={{ marginTop: 16 }}>

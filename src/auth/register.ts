@@ -1,12 +1,17 @@
-import { User } from '../types/auth.d';
+import type { User as AuthUser } from "../types/auth.d";
 
-export async function register(email: string, password: string, displayName: string): Promise<User> {
-  // TODO: Create user in auth backend & return user object
-  return {
-    id: 'user-new',
+export async function register(
+  email: string,
+  password: string,
+  displayName: string
+): Promise<AuthUser> {
+  // TODO: call your real auth backend (e.g., supabase.auth.signUp)
+  const user: AuthUser = {
+    id: "user-new",
     email,
-    displayName,
-    roles: ['user'],
+    roles: "user",       // string, not string[]
+    name: displayName,  // ← satisfy required 'name'
   };
+
+  return user;
 }
-// Placeholder for register.ts

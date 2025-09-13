@@ -3,7 +3,7 @@ export interface TrailStep {
   userId: string;
   visionId: string;
   stepName: string;
-  status: 'incomplete' | 'complete';
+  status: "incomplete" | "complete";
   startedAt: number;
   completedAt?: number;
 }

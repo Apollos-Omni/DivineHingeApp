@@ -4,8 +4,12 @@ interface NotificationPayload {
   body: string;
 }
 
-export async function sendNotification(payload: NotificationPayload): Promise<void> {
+export async function sendNotification(
+  payload: NotificationPayload,
+): Promise<void> {
   // TODO: Integrate Firebase Cloud Messaging or OneSignal push API here
-  console.log(`Notify user ${payload.userId}: ${payload.title} - ${payload.body}`);
+  console.log(
+    `Notify user ${payload.userId}: ${payload.title} - ${payload.body}`,
+  );
 }
 // Placeholder for notificationService.ts

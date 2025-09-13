@@ -1,4 +1,4 @@
-export type AuraState = 'radiant' | 'neutral' | 'dim' | 'burned';
+export type AuraState = "radiant" | "neutral" | "dim" | "burned";
 
 export interface UserAura {
   userId: string;

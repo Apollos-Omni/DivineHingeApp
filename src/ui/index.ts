@@ -1,7 +1,7 @@
 // src/ui/index.ts
 
-import { Audio } from 'expo-av';
-import { Vibration } from 'react-native';
+import { Audio } from "expo-av";
+import { Vibration } from "react-native";
 
 // Placeholder for canvas or native rendering
 export function renderWorld(state: any) {
@@ -18,7 +18,7 @@ export async function playSound(sound: string) {
   try {
     const { sound: soundObject } = await Audio.Sound.createAsync(
       // Replace with local sound file logic
-    require('../assets/backgrounds/images24.png') // Example path
+      require("../assets/backgrounds/images24.png"), // Example path
     );
     await soundObject.playAsync();
   } catch (err) {

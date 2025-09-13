@@ -1,5 +1,5 @@
-import { supabase } from '../database/dbClient';
-import { KarmaRecord } from '../database/schemas';
+import { supabase } from "../database/dbClient";
+import { KarmaRecord } from "../database/schemas";
 
 interface KarmaChange {
   userId: string;
@@ -10,7 +10,7 @@ interface KarmaChange {
 // Record a karma change and update user karma level
 export async function updateKarma(change: KarmaChange): Promise<void> {
   // Insert karma record
-  const { error } = await supabase.from('karma_records').insert({
+  const { error } = await supabase.from("karma_records").insert({
     user_id: change.userId,
     value: change.value,
     reason: change.reason,
@@ -19,7 +19,7 @@ export async function updateKarma(change: KarmaChange): Promise<void> {
   if (error) throw error;
 
   // Update user's karma level atomically
-  const { error: updateError } = await supabase.rpc('increment_karma_level', {
+  const { error: updateError } = await supabase.rpc("increment_karma_level", {
     uid: change.userId,
     delta: change.value,
   });
@@ -30,9 +30,9 @@ export async function updateKarma(change: KarmaChange): Promise<void> {
 // Calculate user's current karma score
 export async function getUserKarmaLevel(userId: string): Promise<number> {
   const { data, error } = await supabase
-    .from('users')
-    .select('karma_level')
-    .eq('id', userId)
+    .from("users")
+    .select("karma_level")
+    .eq("id", userId)
     .single();
 
   if (error) throw error;

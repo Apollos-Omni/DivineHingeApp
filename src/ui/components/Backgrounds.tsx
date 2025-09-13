@@ -1,12 +1,13 @@
 import React from "react";
 import { ImageBackground, StyleSheet, View } from "react-native";
-import backgrounds from '../../lib/Backgrounds';
+import { backgroundImages } from "@/lib/Backgrounds"; // NOTE: capital B to match file
 
-export default function backgroundScreen() {
+export default function BackgroundScreen() {
   return (
     <View style={styles.container}>
-      <ImageBackground source={backgrounds.img42} style={styles.background}>
-        {/* Your screen content goes here */}
+      {/* pick an existing key: img4 / img5 / door1 / door ... */}
+      <ImageBackground source={backgroundImages.img4} style={styles.background}>
+        {/* content */}
       </ImageBackground>
     </View>
   );

@@ -3,7 +3,7 @@ export interface KarmaContract {
   userId: string;
   task: string;
   rewardPoints: number;
-  status: 'pending' | 'completed';
+  status: "pending" | "completed";
   timestamp: number;
 }
 
@@ -12,4 +12,4 @@ export interface KarmaScore {
   totalScore: number;
   rank: string;
   badges: string[];
-}// Placeholder for karma.d.ts
+} // Placeholder for karma.d.ts

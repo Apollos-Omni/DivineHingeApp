@@ -4,4 +4,4 @@ export interface AvatarProfile {
   imageUrl: string;
   frameStyle?: string;
   glowEffect?: boolean;
-}// Placeholder for avatar.d.ts
+} // Placeholder for avatar.d.ts

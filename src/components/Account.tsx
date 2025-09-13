@@ -1,11 +1,13 @@
 // src/components/Account.tsx
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
-import { Button, Input } from '@rneui/themed';
-import { supabase } from '../lib/supabaseClient';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
+import { Button, Input } from "@rneui/themed";
+import { supabase } from "../lib/supabaseClient";
 
 // Derive Session type from your actual client (Supabase v2-safe)
-type Session = Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session'];
+type Session = Awaited<
+  ReturnType<typeof supabase.auth.getSession>
+>["data"]["session"];
 
 type Profile = {
   id: string | null;
@@ -16,16 +18,17 @@ type Profile = {
 };
 
 // If your Edge Function has a different name or path, update this:
-const FUNCTION_URL = 'https://cfqnbsvooirswsevkork.functions.supabase.co/profiles-api';
+const FUNCTION_URL =
+  "https://cfqnbsvooirswsevkork.functions.supabase.co/profiles-api";
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
-  const [website, setWebsite] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState('');
+  const [username, setUsername] = useState("");
+  const [website, setWebsite] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
 
   // We’ll autodetect whether your table links by user_id or id
-  const [profileKey, setProfileKey] = useState<'user_id' | 'id'>('user_id');
+  const [profileKey, setProfileKey] = useState<"user_id" | "id">("user_id");
 
   // Prevent setState after unmount (RN warns in dev)
   const mountedRef = useRef(true);
@@ -34,11 +37,14 @@ export default function Account({ session }: { session: Session }) {
       mountedRef.current = false;
     };
   }, []);
-  const safeSet = useCallback(<T extends unknown[]>(fn: (...args: T) => void) => {
-    return (...args: T) => {
-      if (mountedRef.current) fn(...args);
-    };
-  }, []);
+  const safeSet = useCallback(
+    <T extends unknown[]>(fn: (...args: T) => void) => {
+      return (...args: T) => {
+        if (mountedRef.current) fn(...args);
+      };
+    },
+    [],
+  );
   const safeSetLoading = safeSet(setLoading);
   const safeSetUsername = safeSet(setUsername);
   const safeSetWebsite = safeSet(setWebsite);
@@ -50,22 +56,22 @@ export default function Account({ session }: { session: Session }) {
       getProfileDirect();
     } else {
       // clear fields when session goes null
-      safeSetUsername('');
-      safeSetWebsite('');
-      safeSetAvatarUrl('');
+      safeSetUsername("");
+      safeSetWebsite("");
+      safeSetAvatarUrl("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
 
   const applyRow = useCallback(
-    (row: Partial<Profile> | null, key: 'user_id' | 'id' | null) => {
+    (row: Partial<Profile> | null, key: "user_id" | "id" | null) => {
       // Why: keep UI source-of-truth in sync with DB
-      safeSetProfileKey(key ?? 'user_id');
-      safeSetUsername(row?.username ?? '');
-      safeSetWebsite(row?.website ?? '');
-      safeSetAvatarUrl(row?.avatar_url ?? '');
+      safeSetProfileKey(key ?? "user_id");
+      safeSetUsername(row?.username ?? "");
+      safeSetWebsite(row?.website ?? "");
+      safeSetAvatarUrl(row?.avatar_url ?? "");
     },
-    [safeSetAvatarUrl, safeSetProfileKey, safeSetUsername, safeSetWebsite]
+    [safeSetAvatarUrl, safeSetProfileKey, safeSetUsername, safeSetWebsite],
   );
 
   // -------- Direct DB read (works with user_id or id) --------
@@ -73,35 +79,35 @@ export default function Account({ session }: { session: Session }) {
     try {
       safeSetLoading(true);
       const uid = session?.user?.id;
-      if (!uid) throw new Error('No user on the session');
+      if (!uid) throw new Error("No user on the session");
 
       // Try user_id first (most common schema)
       let { data, error, status } = await supabase
-        .from('profiles')
-        .select('id, user_id, username, website, avatar_url')
-        .eq('user_id', uid)
+        .from("profiles")
+        .select("id, user_id, username, website, avatar_url")
+        .eq("user_id", uid)
         .maybeSingle();
 
       if (error && status !== 406) throw error;
 
       if (data) {
-        applyRow(data, 'user_id');
+        applyRow(data, "user_id");
         return;
       }
 
       // Fallback to id = auth.uid() schema
       const alt = await supabase
-        .from('profiles')
-        .select('id, user_id, username, website, avatar_url')
-        .eq('id', uid)
+        .from("profiles")
+        .select("id, user_id, username, website, avatar_url")
+        .eq("id", uid)
         .maybeSingle();
 
       if (alt.error && alt.status !== 406) throw alt.error;
 
       if (alt.data) {
-        applyRow(alt.data, 'id');
+        applyRow(alt.data, "id");
       } else {
-        applyRow(null, 'user_id');
+        applyRow(null, "user_id");
       }
     } catch (err: any) {
       Alert.alert(err?.message ?? String(err));
@@ -115,7 +121,7 @@ export default function Account({ session }: { session: Session }) {
     try {
       safeSetLoading(true);
       const uid = session?.user?.id;
-      if (!uid) throw new Error('No user on the session');
+      if (!uid) throw new Error("No user on the session");
 
       const updates: Record<string, any> = {
         [profileKey]: uid, // either user_id or id
@@ -127,9 +133,9 @@ export default function Account({ session }: { session: Session }) {
 
       // Why: ensure return payload so UI reflects actual stored values
       const { data, error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .upsert(updates, { onConflict: profileKey })
-        .select('id, user_id, username, website, avatar_url')
+        .select("id, user_id, username, website, avatar_url")
         .single();
 
       if (error) throw error;
@@ -147,24 +153,24 @@ export default function Account({ session }: { session: Session }) {
       safeSetLoading(true);
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
-      if (!token) throw new Error('Not signed in');
+      if (!token) throw new Error("Not signed in");
 
       const resp = await fetch(FUNCTION_URL, {
-        method: 'GET',
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        cache: 'no-store', // Why: bypass caches for fresh profile
+        cache: "no-store", // Why: bypass caches for fresh profile
       });
 
       const json = (await resp.json()) as { data?: Profile; error?: string };
-      if (!resp.ok) throw new Error(json?.error || 'Edge GET failed');
+      if (!resp.ok) throw new Error(json?.error || "Edge GET failed");
 
       const row = json?.data ?? null;
       if (row) {
-        applyRow(row, 'user_id'); // function should return rows keyed by user_id
+        applyRow(row, "user_id"); // function should return rows keyed by user_id
       } else {
-        applyRow(null, 'user_id');
+        applyRow(null, "user_id");
       }
     } catch (err: any) {
       Alert.alert(err?.message ?? String(err));
@@ -177,16 +183,16 @@ export default function Account({ session }: { session: Session }) {
   async function updateMyProfileViaEdge() {
     try {
       safeSetLoading(true);
-      const { data, error } = await supabase.functions.invoke<{ data?: Profile; error?: string }>(
-        'profiles-api',
-        {
-          body: { username, website, avatar_url: avatarUrl },
-        }
-      );
+      const { data, error } = await supabase.functions.invoke<{
+        data?: Profile;
+        error?: string;
+      }>("profiles-api", {
+        body: { username, website, avatar_url: avatarUrl },
+      });
       if (error) throw error;
 
       const row = data?.data ?? null;
-      if (row) applyRow(row, 'user_id');
+      if (row) applyRow(row, "user_id");
     } catch (err: any) {
       Alert.alert(err?.message ?? String(err));
     } finally {
@@ -209,7 +215,7 @@ export default function Account({ session }: { session: Session }) {
   return (
     <View style={styles.container}>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email ?? ''} disabled />
+        <Input label="Email" value={session?.user?.email ?? ""} disabled />
       </View>
 
       <View style={styles.verticallySpaced}>
@@ -223,21 +229,33 @@ export default function Account({ session }: { session: Session }) {
       {/* Local/direct DB actions */}
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
-          title={loading ? 'Loading…' : 'Update (Direct DB)'}
+          title={loading ? "Loading…" : "Update (Direct DB)"}
           onPress={updateProfileDirect}
           disabled={loading}
         />
       </View>
       <View style={styles.verticallySpaced}>
-        <Button title="Reload (Direct DB)" onPress={getProfileDirect} disabled={loading} />
+        <Button
+          title="Reload (Direct DB)"
+          onPress={getProfileDirect}
+          disabled={loading}
+        />
       </View>
 
       {/* Edge Function actions */}
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Button title="Edge: Get Profile" onPress={getMyProfileViaEdge} disabled={loading} />
+        <Button
+          title="Edge: Get Profile"
+          onPress={getMyProfileViaEdge}
+          disabled={loading}
+        />
       </View>
       <View style={styles.verticallySpaced}>
-        <Button title="Edge: Update Profile" onPress={updateMyProfileViaEdge} disabled={loading} />
+        <Button
+          title="Edge: Update Profile"
+          onPress={updateMyProfileViaEdge}
+          disabled={loading}
+        />
       </View>
 
       {/* Sign out */}
@@ -250,6 +268,6 @@ export default function Account({ session }: { session: Session }) {
 
 const styles = StyleSheet.create({
   container: { marginTop: 40, padding: 12 },
-  verticallySpaced: { paddingTop: 4, paddingBottom: 4, alignSelf: 'stretch' },
+  verticallySpaced: { paddingTop: 4, paddingBottom: 4, alignSelf: "stretch" },
   mt20: { marginTop: 20 },
 });

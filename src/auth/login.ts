@@ -1,6 +1,6 @@
 // src/auth/login.ts
-import { supabase } from '../lib/supabaseClient';
-import type { User } from '@supabase/supabase-js';
+import { supabase } from "../lib/supabaseClient";
+import type { User } from "@supabase/supabase-js";
 
 /**
  * Sign in with email/password via
@@ -30,7 +30,7 @@ export async function logout(): Promise<void> {
 export async function getCurrentUser(): Promise<User | null> {
   const { data, error } = await supabase.auth.getSession();
   if (error) {
-    console.warn('getCurrentUser error:', error.message);
+    console.warn("getCurrentUser error:", error.message);
   }
   return data?.session?.user ?? null;
 }

@@ -1,7 +1,7 @@
 // src/lib/utils.ts
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function getFPS(delta: number): number {
@@ -9,7 +9,7 @@ export function getFPS(delta: number): number {
 }
 
 export function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 export function generateVisionId(): string {

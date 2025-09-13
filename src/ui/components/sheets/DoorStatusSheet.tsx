@@ -1,5 +1,11 @@
 // src/ui/components/doors/DoorStatusSheet.tsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Modal,
   Pressable,
@@ -119,7 +125,7 @@ export default function DoorStatusSheet({
         }
       }
     },
-    [sheetH, insets.bottom, visible, closedY, y, backdrop]
+    [sheetH, insets.bottom, visible, closedY, y, backdrop],
   );
 
   // show/hide transitions
@@ -128,12 +134,23 @@ export default function DoorStatusSheet({
     const reduce = reducedMotionRef.current;
     const showAnim = () => {
       y.value = reduce ? 0 : withSpring(0, SPRING);
-      backdrop.value = withTiming(1, { duration: reduce ? 0 : 180, easing: Easing.out(Easing.quad) });
+      backdrop.value = withTiming(1, {
+        duration: reduce ? 0 : 180,
+        easing: Easing.out(Easing.quad),
+      });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
     const hideAnim = () => {
-      y.value = reduce ? closedY.value : withTiming(closedY.value, { duration: 220, easing: Easing.inOut(Easing.quad) });
-      backdrop.value = withTiming(0, { duration: reduce ? 0 : 160, easing: Easing.out(Easing.quad) });
+      y.value = reduce
+        ? closedY.value
+        : withTiming(closedY.value, {
+            duration: 220,
+            easing: Easing.inOut(Easing.quad),
+          });
+      backdrop.value = withTiming(0, {
+        duration: reduce ? 0 : 160,
+        easing: Easing.out(Easing.quad),
+      });
     };
 
     if (visible) showAnim();
@@ -157,14 +174,20 @@ export default function DoorStatusSheet({
     () =>
       Gesture.Pan()
         .onChange((e) => {
-          const next = Math.max(0, Math.min(closedY.value, y.value + e.changeY));
+          const next = Math.max(
+            0,
+            Math.min(closedY.value, y.value + e.changeY),
+          );
           y.value = next;
           backdrop.value = 1 - next / closedY.value;
         })
         .onEnd(() => {
           const threshold = closedY.value * 0.35;
           if (y.value > threshold) {
-            y.value = withTiming(closedY.value, { duration: 200, easing: Easing.out(Easing.cubic) });
+            y.value = withTiming(closedY.value, {
+              duration: 200,
+              easing: Easing.out(Easing.cubic),
+            });
             backdrop.value = withTiming(0, { duration: 160 });
             runOnJS(onClose)();
           } else {
@@ -172,7 +195,7 @@ export default function DoorStatusSheet({
             backdrop.value = withTiming(1, { duration: 120 });
           }
         }),
-    [y, closedY, backdrop, onClose]
+    [y, closedY, backdrop, onClose],
   );
 
   // animated styles
@@ -194,10 +217,13 @@ export default function DoorStatusSheet({
     (text: string) => {
       if (speakFeedback) {
         Speech.stop();
-        Speech.speak(text, { pitch: 1.0, rate: Platform.select({ ios: 0.47, android: 0.9, default: 1 }) });
+        Speech.speak(text, {
+          pitch: 1.0,
+          rate: Platform.select({ ios: 0.47, android: 0.9, default: 1 }),
+        });
       }
     },
-    [speakFeedback]
+    [speakFeedback],
   );
 
   const act = useCallback(
@@ -217,15 +243,27 @@ export default function DoorStatusSheet({
         onToggle?.();
       }
     },
-    [busy, onLock, onUnlock, onToggle, speak]
+    [busy, onLock, onUnlock, onToggle, speak],
   );
 
   return (
-    <Modal transparent animationType="none" visible={visible} onRequestClose={onClose} statusBarTranslucent>
+    <Modal
+      transparent
+      animationType="none"
+      visible={visible}
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
       {/* Backdrop */}
       <Animated.View style={[StyleSheet.absoluteFill, backdropStyle]}>
         <BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessible accessibilityRole="button" accessibilityLabel="Close door status sheet" />
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Close door status sheet"
+        />
       </Animated.View>
 
       {/* Bottom Sheet with drag handle, aura border, safe-area padding */}
@@ -244,12 +282,23 @@ export default function DoorStatusSheet({
           ]}
         >
           {/* Aura border */}
-          <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { bottom: -2 }, auraStyle]}>
+          <Animated.View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { bottom: -2 }, auraStyle]}
+          >
             <LinearGradient
               colors={[colors.aura1, colors.aura2]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
-              style={{ position: "absolute", left: 12, right: 12, top: -2, bottom: -2, borderRadius: 28, opacity: 0.35 }}
+              style={{
+                position: "absolute",
+                left: 12,
+                right: 12,
+                top: -2,
+                bottom: -2,
+                borderRadius: 28,
+                opacity: 0.35,
+              }}
             />
           </Animated.View>
 
@@ -266,17 +315,37 @@ export default function DoorStatusSheet({
             }}
           >
             {/* Handle */}
-            <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 6 }}>
-              <View style={{ width: 45, height: 5, borderRadius: 999, backgroundColor: "#3a3a52" }} />
+            <View
+              style={{ alignItems: "center", paddingTop: 8, paddingBottom: 6 }}
+            >
+              <View
+                style={{
+                  width: 45,
+                  height: 5,
+                  borderRadius: 999,
+                  backgroundColor: "#3a3a52",
+                }}
+              />
             </View>
 
             {/* Header */}
-            <View style={{ paddingHorizontal: 16, paddingBottom: 10, paddingTop: 2 }}>
-              <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800" }}>
+            <View
+              style={{
+                paddingHorizontal: 16,
+                paddingBottom: 10,
+                paddingTop: 2,
+              }}
+            >
+              <Text
+                style={{ color: colors.text, fontSize: 18, fontWeight: "800" }}
+              >
                 {doorName} {doorId ? `• #${doorId}` : ""}
               </Text>
               <Text style={{ color: colors.sub, marginTop: 4 }}>
-                Status: <Text style={{ color: labelColor(tone), fontWeight: "800" }}>{label}</Text>
+                Status:{" "}
+                <Text style={{ color: labelColor(tone), fontWeight: "800" }}>
+                  {label}
+                </Text>
               </Text>
             </View>
 
@@ -284,22 +353,35 @@ export default function DoorStatusSheet({
             {busy ? (
               <View style={{ paddingVertical: 18, alignItems: "center" }}>
                 <ActivityIndicator color={tone} />
-                <Text style={{ color: colors.sub, marginTop: 8 }}>Talking to hinge…</Text>
+                <Text style={{ color: colors.sub, marginTop: 8 }}>
+                  Talking to hinge…
+                </Text>
               </View>
             ) : (
               <View style={{ padding: 16, gap: 10 }}>
                 {status !== "locked" && (
-                  <GradientButton title="Lock" onPress={() => act("lock")} style={{ opacity: busy ? 0.6 : 1 }} />
+                  <GradientButton
+                    title="Lock"
+                    onPress={() => act("lock")}
+                    style={{ opacity: busy ? 0.6 : 1 }}
+                  />
                 )}
                 {status !== "unlocked" && (
-                  <GradientButton title="Unlock" onPress={() => act("unlock")} style={{ opacity: busy ? 0.6 : 1 }} />
+                  <GradientButton
+                    title="Unlock"
+                    onPress={() => act("unlock")}
+                    style={{ opacity: busy ? 0.6 : 1 }}
+                  />
                 )}
                 <GradientButton title="Toggle" onPress={() => act("toggle")} />
               </View>
             )}
 
             {/* Footer */}
-            <Pressable onPress={onClose} style={{ alignSelf: "center", marginBottom: 10, padding: 8 }}>
+            <Pressable
+              onPress={onClose}
+              style={{ alignSelf: "center", marginBottom: 10, padding: 8 }}
+            >
               <Text style={{ color: colors.sub }}>Close</Text>
             </Pressable>
           </View>

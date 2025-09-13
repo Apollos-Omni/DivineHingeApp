@@ -1,7 +1,12 @@
 // src/game/loop.ts
 
-import { updateWorldState, renderScene, handleUserInput, detectAnomalies } from './engine';
-import { getFPS, sleep } from '../lib/utils';
+import {
+  updateWorldState,
+  renderScene,
+  handleUserInput,
+  detectAnomalies,
+} from "./engine";
+import { getFPS, sleep } from "../lib/utils";
 
 let isRunning = false;
 const TARGET_FPS = 60;
@@ -11,7 +16,7 @@ export const runGameLoop = async () => {
   if (isRunning) return;
   isRunning = true;
 
-  console.log('[Loop] Game Loop started.');
+  console.log("[Loop] Game Loop started.");
 
   let lastFrameTime = performance.now();
 
@@ -25,18 +30,19 @@ export const runGameLoop = async () => {
       lastFrameTime = now;
 
       try {
-        handleUserInput();                     // Listen for inputs (touch, click, sensor)
-        updateWorldState(delta);              // Physics, AI, environmental shifts
-        detectAnomalies();                    // Optional: Detect unexpected states or hacks
-        renderScene();                        // Draw visuals, sounds, haptics
+        handleUserInput(); // Listen for inputs (touch, click, sensor)
+        updateWorldState(delta); // Physics, AI, environmental shifts
+        detectAnomalies(); // Optional: Detect unexpected states or hacks
+        renderScene(); // Draw visuals, sounds, haptics
       } catch (error) {
-        console.error('[Loop] Error in game loop:', error);
+        console.error("[Loop] Error in game loop:", error);
         isRunning = false;
         return;
       }
     }
 
-    const timeToNextFrame = FRAME_DURATION - (performance.now() - lastFrameTime);
+    const timeToNextFrame =
+      FRAME_DURATION - (performance.now() - lastFrameTime);
     await sleep(Math.max(0, timeToNextFrame));
 
     requestAnimationFrame(loop);
@@ -46,6 +52,6 @@ export const runGameLoop = async () => {
 };
 
 export const stopGameLoop = () => {
-  console.log('[Loop] Game Loop stopped.');
+  console.log("[Loop] Game Loop stopped.");
   isRunning = false;
 };

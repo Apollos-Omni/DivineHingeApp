@@ -11,14 +11,23 @@ interface BehaviorRecord {
   isNice: boolean;
 }
 
-export async function addWish(userId: string, gift: string, pointsRequired: number): Promise<void> {
+export async function addWish(
+  userId: string,
+  gift: string,
+  pointsRequired: number,
+): Promise<void> {
   // TODO: Insert wish into DB
   console.log(`Added wish for user ${userId}: ${gift} (${pointsRequired} pts)`);
 }
 
-export async function logBehavior(userId: string, isNice: boolean): Promise<void> {
+export async function logBehavior(
+  userId: string,
+  isNice: boolean,
+): Promise<void> {
   // TODO: Insert behavior record into DB
-  console.log(`Behavior logged for user ${userId}: ${isNice ? 'Nice' : 'Naughty'}`);
+  console.log(
+    `Behavior logged for user ${userId}: ${isNice ? "Nice" : "Naughty"}`,
+  );
 }
 
 // Fetch points earned by user (sum of good deeds)

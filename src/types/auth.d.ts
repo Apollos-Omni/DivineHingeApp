@@ -18,12 +18,12 @@ export interface RegisterInput {
 
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
   avatarUrl?: string;
-  role?: string;
+  roles: string;
   preferences?: Record<string, any>;
+  displayName?: string; // ← add this
 }
 
-export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'error';
-
+export type AuthStatus = "idle" | "loading" | "authenticated" | "error";

@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Switch } from 'react-native';
-import { useScheduleState } from '../../state/scheduleState';
-import { useRoute } from '@react-navigation/native';
-import { useDeviceState } from '../../state/deviceState';
-import { BackButton } from '../components/BackButton';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Switch,
+} from "react-native";
+import { useScheduleState } from "../../state/scheduleState";
+import { useRoute } from "@react-navigation/native";
+import { useDeviceState } from "../../state/deviceState";
+import { BackButton } from "../components/BackButton";
 
 export const SchedulesScreen: React.FC = () => {
   const route = useRoute<any>();
   const { devices } = useDeviceState();
   const { schedules, addDaily, addOnce, toggle, remove } = useScheduleState();
 
-  const [doorId, setDoorId] = useState<string>('');
-  const [hhmm, setHHMM] = useState('22:00');
+  const [doorId, setDoorId] = useState<string>("");
+  const [hhmm, setHHMM] = useState("22:00");
   const [iso, setISO] = useState(new Date().toISOString());
-  const [action, setAction] = useState<'lock'|'unlock'>('lock');
+  const [action, setAction] = useState<"lock" | "unlock">("lock");
 
   // Make firstDoor explicit & stable for deps
   const firstDoor = React.useMemo<string>(() => {
     const fromRoute = (route.params as any)?.doorId as string | undefined;
-    return fromRoute ?? devices[0]?.id ?? '';
+    return fromRoute ?? devices[0]?.id ?? "";
   }, [route, devices]);
 
   // Initialize doorId safely and satisfy exhaustive-deps
@@ -32,7 +40,9 @@ export const SchedulesScreen: React.FC = () => {
       <Text style={styles.title}>Schedules</Text>
 
       {devices.length === 0 ? (
-        <Text style={{ color: '#cfcfcf' }}>Add a device first to schedule locks.</Text>
+        <Text style={{ color: "#cfcfcf" }}>
+          Add a device first to schedule locks.
+        </Text>
       ) : (
         <>
           <Text style={styles.label}>Door ID</Text>
@@ -47,14 +57,14 @@ export const SchedulesScreen: React.FC = () => {
           <Text style={styles.label}>Action</Text>
           <View style={styles.row}>
             <TouchableOpacity
-              style={[styles.pill, action === 'lock' && styles.pillOn]}
-              onPress={() => setAction('lock')}
+              style={[styles.pill, action === "lock" && styles.pillOn]}
+              onPress={() => setAction("lock")}
             >
               <Text style={styles.pillTxt}>Lock</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.pill, action === 'unlock' && styles.pillOn]}
-              onPress={() => setAction('unlock')}
+              style={[styles.pill, action === "unlock" && styles.pillOn]}
+              onPress={() => setAction("unlock")}
             >
               <Text style={styles.pillTxt}>Unlock</Text>
             </TouchableOpacity>
@@ -99,17 +109,22 @@ export const SchedulesScreen: React.FC = () => {
       <FlatList
         data={schedules}
         keyExtractor={(i) => i.id}
-
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         renderItem={({ item }) => (
           <View style={styles.item}>
             <Text style={styles.iText}>
-              {item.kind.toUpperCase()} • {item.action} • {item.time} • door {item.doorId}
+              {item.kind.toUpperCase()} • {item.action} • {item.time} • door{" "}
+              {item.doorId}
             </Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Switch value={item.enabled} onValueChange={(v) => toggle(item.id, v)} />
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
+            >
+              <Switch
+                value={item.enabled}
+                onValueChange={(v) => toggle(item.id, v)}
+              />
               <TouchableOpacity onPress={() => remove(item.id)}>
-                <Text style={{ color: '#ff7777' }}>Delete</Text>
+                <Text style={{ color: "#ff7777" }}>Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -120,18 +135,47 @@ export const SchedulesScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container:{flex:1,backgroundColor:'#121212',padding:16},
-  title:{color:'#fff',fontWeight:'900',fontSize:22,marginBottom:12},
-  label:{color:'#cfcfcf',fontWeight:'700',marginTop:8,marginBottom:6},
-  input:{backgroundColor:'#1b1b1b',color:'#fff',borderRadius:10,padding:12},
-  row:{flexDirection:'row',gap:8},
-  pill:{backgroundColor:'#2a2a2a',paddingVertical:8,paddingHorizontal:14,borderRadius:14},
-  pillOn:{backgroundColor:'#7FFF00'},
-  pillTxt:{color:'#fff',fontWeight:'800'},
-  primary:{backgroundColor:'#7FFF00',padding:12,borderRadius:10,marginTop:10,alignItems:'center'},
-  primaryTxt:{color:'#121212',fontWeight:'900'},
-  secondary:{backgroundColor:'#2a2a2a',padding:12,borderRadius:10,marginTop:10,alignItems:'center'},
-  secondaryTxt:{color:'#eee',fontWeight:'900'},
-  item:{backgroundColor:'#1a1624',borderRadius:12,padding:12,flexDirection:'row',justifyContent:'space-between',alignItems:'center'},
-  iText:{color:'#fff',fontWeight:'700'},
+  container: { flex: 1, backgroundColor: "#121212", padding: 16 },
+  title: { color: "#fff", fontWeight: "900", fontSize: 22, marginBottom: 12 },
+  label: { color: "#cfcfcf", fontWeight: "700", marginTop: 8, marginBottom: 6 },
+  input: {
+    backgroundColor: "#1b1b1b",
+    color: "#fff",
+    borderRadius: 10,
+    padding: 12,
+  },
+  row: { flexDirection: "row", gap: 8 },
+  pill: {
+    backgroundColor: "#2a2a2a",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+  },
+  pillOn: { backgroundColor: "#7FFF00" },
+  pillTxt: { color: "#fff", fontWeight: "800" },
+  primary: {
+    backgroundColor: "#7FFF00",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  primaryTxt: { color: "#121212", fontWeight: "900" },
+  secondary: {
+    backgroundColor: "#2a2a2a",
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  secondaryTxt: { color: "#eee", fontWeight: "900" },
+  item: {
+    backgroundColor: "#1a1624",
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  iText: { color: "#fff", fontWeight: "700" },
 });

@@ -13,7 +13,10 @@ export async function unlockDoor(id: string): Promise<DoorStatus> {
   await delay(220);
   return "unlocked";
 }
-export async function toggleDoor(id: string, current: DoorStatus): Promise<DoorStatus> {
+export async function toggleDoor(
+  id: string,
+  current: DoorStatus,
+): Promise<DoorStatus> {
   await delay(220);
   if (current === "locked") return "unlocked";
   if (current === "unlocked") return "locked";
@@ -21,4 +24,6 @@ export async function toggleDoor(id: string, current: DoorStatus): Promise<DoorS
   return "locked";
 }
 
-function delay(ms: number) { return new Promise(res => setTimeout(res, ms)); }
+function delay(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
+}

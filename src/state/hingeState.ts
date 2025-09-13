@@ -1,6 +1,6 @@
 // DivineHingeApp/src/state/hingeState.ts
 
-import { create } from 'zustand'; // ✅ Named import
+import { create } from "zustand"; // ✅ Named import
 
 interface DoorStatus {
   doorId: string;
@@ -10,7 +10,11 @@ interface DoorStatus {
 
 interface HingeState {
   doors: DoorStatus[];
-  updateDoorStatus: (doorId: string, isOpen: boolean, isLocked: boolean) => void;
+  updateDoorStatus: (
+    doorId: string,
+    isOpen: boolean,
+    isLocked: boolean,
+  ) => void;
 }
 
 export const useHingeState = create<HingeState>((set) => ({

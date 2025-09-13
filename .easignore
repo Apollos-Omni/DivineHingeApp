@@ -1,0 +1,12 @@
+node_modules
+ios/Pods
+android/.gradle
+android/build
+ios/build
+**/*.mp4
+**/*.zip
+**/*.psd
+**/*.ai
+.git
+.expo
+*.keystore

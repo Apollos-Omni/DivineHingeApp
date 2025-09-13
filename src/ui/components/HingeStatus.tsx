@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import React from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 
 interface Props {
   isOpen: boolean;
@@ -12,7 +12,8 @@ export const HingeStatus: React.FC<Props> = ({ isOpen, isLocked }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.statusText}>
-        Door is {isOpen ? 'Open' : 'Closed'} and {isLocked ? 'Locked 🔒' : 'Unlocked 🔓'}
+        Door is {isOpen ? "Open" : "Closed"} and{" "}
+        {isLocked ? "Locked 🔒" : "Unlocked 🔓"}
       </Text>
     </View>
   );
@@ -21,13 +22,13 @@ export const HingeStatus: React.FC<Props> = ({ isOpen, isLocked }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 12,
-    backgroundColor: '#222',
+    backgroundColor: "#222",
     borderRadius: 8,
     marginVertical: 8,
   },
   statusText: {
-    color: '#EEE',
-    fontWeight: '600',
+    color: "#EEE",
+    fontWeight: "600",
     fontSize: 16,
   },
 });

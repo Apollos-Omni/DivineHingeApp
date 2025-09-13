@@ -2,9 +2,9 @@ export interface HingeEvent {
   id: string;
   userId: string;
   doorId: string;
-  timestamp: number;          // Unix epoch ms
-  action: 'open' | 'close';
-  status: 'locked' | 'unlocked';
+  timestamp: number; // Unix epoch ms
+  action: "open" | "close";
+  status: "locked" | "unlocked";
 }
 
 export interface UserProfile {
@@ -44,10 +44,10 @@ export interface Notification {
 }
 
 export enum VisionStatus {
-  Draft = 'draft',
-  Active = 'active',
-  Completed = 'completed',
-  Archived = 'archived',
+  Draft = "draft",
+  Active = "active",
+  Completed = "completed",
+  Archived = "archived",
 }
 
 export interface VisionSchema {

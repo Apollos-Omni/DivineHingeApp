@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { User } from '../types/auth.d';
+import { create } from "zustand";
+import { User } from "../types/auth.d";
 
 interface AuthState {
   user: User | null;

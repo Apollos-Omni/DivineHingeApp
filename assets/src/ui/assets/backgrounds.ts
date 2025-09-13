@@ -1,6 +1,0 @@
-﻿export const BACKGROUNDS = {
-  fallback: require('../../../../assets/Backgrounds/fallback-1x1.png'),
-};
-export type BackgroundKey = keyof typeof BACKGROUNDS;
-
-

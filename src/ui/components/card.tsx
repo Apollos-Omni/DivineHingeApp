@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
-import { cn } from '../../lib/utils'; // if you have a utility like classNames
-import { motion } from 'framer-motion';
+import React, { ReactNode } from "react";
+import { cn } from "../../lib/utils"; // if you have a utility like classNames
+import { motion } from "framer-motion";
 
 interface CardProps {
   children: ReactNode;
@@ -20,8 +20,8 @@ export const Card = ({ children, className }: CardProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={cn(
-        'rounded-xl shadow-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 overflow-hidden',
-        className
+        "rounded-xl shadow-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 overflow-hidden",
+        className,
       )}
     >
       {children}
@@ -30,9 +30,5 @@ export const Card = ({ children, className }: CardProps) => {
 };
 
 export const CardContent = ({ children, className }: CardContentProps) => {
-  return (
-    <div className={cn('p-4', className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("p-4", className)}>{children}</div>;
 };

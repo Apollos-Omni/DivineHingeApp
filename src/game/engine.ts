@@ -1,7 +1,7 @@
 // src/game/engine.ts
 
-import { getSensorData } from '../hardware/sensors';
-import { playSound, updateUI, renderWorld, vibrate } from '../ui';
+import { getSensorData } from "../hardware/sensors";
+import { playSound, updateUI, renderWorld, vibrate } from "../ui";
 
 let worldState = {
   player: {
@@ -17,10 +17,10 @@ export function handleUserInput() {
   // Placeholder for real input (touch, keyboard, gamepad)
   // Update player movement
   const keys = globalThis.input || {};
-  if (keys['ArrowUp']) worldState.player.y -= worldState.player.velocity;
-  if (keys['ArrowDown']) worldState.player.y += worldState.player.velocity;
-  if (keys['ArrowLeft']) worldState.player.x -= worldState.player.velocity;
-  if (keys['ArrowRight']) worldState.player.x += worldState.player.velocity;
+  if (keys["ArrowUp"]) worldState.player.y -= worldState.player.velocity;
+  if (keys["ArrowDown"]) worldState.player.y += worldState.player.velocity;
+  if (keys["ArrowLeft"]) worldState.player.x -= worldState.player.velocity;
+  if (keys["ArrowRight"]) worldState.player.x += worldState.player.velocity;
 }
 
 export function updateWorldState(delta: number) {
@@ -39,7 +39,7 @@ export function detectAnomalies() {
   // Detect abnormal player states
   if (worldState.player.x < 0 || worldState.player.y < 0) {
     worldState.anomalyDetected = true;
-    console.warn('[Engine] Anomaly detected: Negative position');
+    console.warn("[Engine] Anomaly detected: Negative position");
     vibrate(300); // Optional haptic warning
   } else {
     worldState.anomalyDetected = false;
@@ -47,9 +47,9 @@ export function detectAnomalies() {
 }
 
 export function renderScene() {
-  renderWorld(worldState);  // Canvas, UI animation
-  updateUI(worldState);     // Stats, score, energy
+  renderWorld(worldState); // Canvas, UI animation
+  updateUI(worldState); // Stats, score, energy
   if (worldState.anomalyDetected) {
-    playSound('alarm');
+    playSound("alarm");
   }
 }

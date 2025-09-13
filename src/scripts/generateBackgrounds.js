@@ -11,7 +11,7 @@ const OUTPUT_FILE = path.join(__dirname, "src/Backgrounds.ts");
 const EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".mp4"];
 
 // Read all files in the folder
-const files = fs.readdirSync(ASSETS_DIR).filter(file => {
+const files = fs.readdirSync(ASSETS_DIR).filter((file) => {
   return EXTENSIONS.includes(path.extname(file).toLowerCase());
 });
 

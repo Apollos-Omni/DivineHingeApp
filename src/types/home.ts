@@ -7,14 +7,14 @@ export type Room = {
   polygon: Vec2[];
 };
 
-export type DoorStatus = 'locked' | 'unlocked' | 'ajar';
+export type DoorStatus = "locked" | "unlocked" | "ajar";
 
 export type Door = {
   id: string;
   name?: string;
   // center and size normalized; angle in degrees (0=right)
   center: Vec2;
-  width: number;   // normalized width of door leaf/opening
+  width: number; // normalized width of door leaf/opening
   thickness: number; // normalized thickness (visual)
   angle: number;
   status: DoorStatus;

@@ -9,5 +9,5 @@ export const isValidPassword = (password: string): boolean =>
   /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(password);
 
 export const isNonEmptyString = (value: string): boolean =>
-  typeof value === 'string' && value.trim().length > 0;
+  typeof value === "string" && value.trim().length > 0;
 // Placeholder for validators.ts

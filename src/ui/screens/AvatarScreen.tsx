@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { useAvatarState } from '../../state/avatarState';
+import React from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import { useAvatarState } from "../../state/avatarState";
 
 export const AvatarScreen: React.FC = () => {
   const avatar = useAvatarState((state: { avatar: any }) => state.avatar);
@@ -19,18 +19,37 @@ export const AvatarScreen: React.FC = () => {
       <FlatList
         data={avatar.upgrades}
         keyExtractor={(item) => item}
-        renderItem={({ item }) => <Text style={styles.upgradeItem}>{item}</Text>}
+        renderItem={({ item }) => (
+          <Text style={styles.upgradeItem}>{item}</Text>
+        )}
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#121212' },
-  title: { fontSize: 28, fontWeight: 'bold', color: '#7FFF00', marginBottom: 24 },
-  stat: { color: '#CCC', fontSize: 20, marginBottom: 8 },
-  subtitle: { fontSize: 22, fontWeight: '600', color: '#AAA', marginTop: 20, marginBottom: 12 },
-  upgradeItem: { color: '#7FFF00', fontSize: 18, marginBottom: 6 },
-  empty: { flex: 1, color: '#777', textAlign: 'center', marginTop: 40, fontSize: 18 },
+  container: { flex: 1, padding: 24, backgroundColor: "#121212" },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#7FFF00",
+    marginBottom: 24,
+  },
+  stat: { color: "#CCC", fontSize: 20, marginBottom: 8 },
+  subtitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#AAA",
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  upgradeItem: { color: "#7FFF00", fontSize: 18, marginBottom: 6 },
+  empty: {
+    flex: 1,
+    color: "#777",
+    textAlign: "center",
+    marginTop: 40,
+    fontSize: 18,
+  },
 });
 // Placeholder for AvatarScreen.tsx

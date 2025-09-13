@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    // A) Expo Go — launch and debug Hermes from VS Code
+    {
+      "name": "Expo Go: Debug Hermes",
+      "type": "reactnativedirect",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "platform": "exponent",
+      "expoHostType": "lan",
+      "enableDebug": true
+    },
+
+    // B) EAS dev-client — attach after: `npx expo start --dev-client`
+    {
+      "name": "Dev Client: Attach to Hermes",
+      "type": "reactnativedirect",
+      "request": "attach",
+      "cwd": "${workspaceFolder}"
+    },
+
+    // C) Attach to Metro/packager (fallback/logging)
+    {
+      "name": "Attach to Metro (Packager)",
+      "type": "reactnative",
+      "request": "attach",
+      "cwd": "${workspaceFolder}"
+    },
+
+    // D) Node script (handy for scripts/generateBackgrounds.js or server stubs)
+    {
+      "name": "Node: Current File",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Expo Go + Attach",
+      "configurations": ["Expo Go: Debug Hermes", "Attach to Metro (Packager)"]
+    }
+  ]
+}

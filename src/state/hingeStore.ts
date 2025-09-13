@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-export type HingeStatus = 'open' | 'closed' | 'jammed' | 'unknown';
+export type HingeStatus = "open" | "closed" | "jammed" | "unknown";
 
 export interface HingeData {
   id: string;
@@ -22,7 +22,7 @@ interface HingeStore {
   lockHinge: (hingeId: string) => void;
   unlockHinge: (hingeId: string) => void;
   setSelectedHinge: (hingeId: string | null) => void;
-  updateHingeTime: (hingeId: string, type: 'opened' | 'closed') => void;
+  updateHingeTime: (hingeId: string, type: "opened" | "closed") => void;
   loadHinges: (hinges: HingeData[]) => void;
 }
 
@@ -88,8 +88,8 @@ export const useHingeStore = create<HingeStore>()(
               ...state.hinges,
               [id]: {
                 ...hinge,
-                lastOpened: type === 'opened' ? Date.now() : hinge.lastOpened,
-                lastClosed: type === 'closed' ? Date.now() : hinge.lastClosed,
+                lastOpened: type === "opened" ? Date.now() : hinge.lastOpened,
+                lastClosed: type === "closed" ? Date.now() : hinge.lastClosed,
               },
             },
           };
@@ -97,14 +97,17 @@ export const useHingeStore = create<HingeStore>()(
 
       loadHinges: (hinges) =>
         set(() => ({
-          hinges: hinges.reduce((acc, hinge) => {
-            acc[hinge.id] = hinge;
-            return acc;
-          }, {} as Record<string, HingeData>),
+          hinges: hinges.reduce(
+            (acc, hinge) => {
+              acc[hinge.id] = hinge;
+              return acc;
+            },
+            {} as Record<string, HingeData>,
+          ),
         })),
     }),
     {
-      name: 'hinge-storage', // localStorage key
-    }
-  )
+      name: "hinge-storage", // localStorage key
+    },
+  ),
 );

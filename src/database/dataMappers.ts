@@ -1,4 +1,10 @@
-import { HingeEvent, UserProfile, KarmaRecord, Avatar, Notification } from './schemas';
+import {
+  HingeEvent,
+  UserProfile,
+  KarmaRecord,
+  Avatar,
+  Notification,
+} from "./schemas";
 
 // Example: Map Supabase row to HingeEvent
 export function mapHingeEvent(row: any): HingeEvent {

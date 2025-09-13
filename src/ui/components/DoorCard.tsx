@@ -1,10 +1,18 @@
-import React from 'react';
-import { Pressable, View, Text } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
-import GlassCard from './common/GlassCard';
-import { colors, spacing } from '../../theme/tokens';
+import React from "react";
+import { Pressable, View, Text } from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import GlassCard from "./common/GlassCard";
 
-type Status = 'locked' | 'unlocked' | 'ajar';
+// ✅ Pull one object from the theme barrel, then destructure
+import { tokens } from "@/theme"; // or "../../theme" if you didn't set "@"
+const { colors, spacing } = tokens;
+
+type Status = "locked" | "unlocked" | "ajar";
 
 type Props = {
   name?: string;
@@ -12,11 +20,17 @@ type Props = {
   onPress?: () => void;
 };
 
-const DoorCard: React.FC<Props> = ({ name = 'Front Door', status = 'locked', onPress }) => {
-  const color =
-    status === 'locked' ? colors.danger :
-    status === 'unlocked' ? colors.primary :
-    colors.warn;
+const DoorCard: React.FC<Props> = ({
+  name = "Front Door",
+  status = "locked",
+  onPress,
+}) => {
+  const statusColor =
+    status === "locked"
+      ? colors.danger
+      : status === "unlocked"
+      ? colors.primary
+      : colors.warn;
 
   const scale = useSharedValue(1);
   const openAnim = useSharedValue(0);
@@ -31,27 +45,53 @@ const DoorCard: React.FC<Props> = ({ name = 'Front Door', status = 'locked', onP
   });
 
   const onTap = () => {
-    scale.value = withTiming(0.97, { duration: 80, easing: Easing.out(Easing.cubic) }, () => {
-      scale.value = withTiming(1, { duration: 80 });
+    scale.value = withTiming(
+      0.97,
+      { duration: 80, easing: Easing.out(Easing.cubic) },
+      () => {
+        scale.value = withTiming(1, { duration: 80 });
+      }
+    );
+    openAnim.value = withTiming(openAnim.value > 0.5 ? 0 : 1, {
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
     });
-    openAnim.value = withTiming(openAnim.value > 0.5 ? 0 : 1, { duration: 220, easing: Easing.out(Easing.cubic) });
     onPress?.();
   };
 
   return (
-    <Pressable onPress={onTap} style={{ width: '100%' }}>
+    <Pressable onPress={onTap} style={{ width: "100%" }}>
       <Animated.View style={[{ marginBottom: spacing.lg }, rStyle]}>
         <GlassCard>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color, marginRight: 8 }} />
-            <Text style={{ color: colors.text, fontWeight: '700' }}>{name}</Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: statusColor,
+                marginRight: 8,
+              }}
+            />
+            <Text style={{ color: colors.text, fontWeight: "700" }}>{name}</Text>
           </View>
 
           <Animated.View
-            style={[{ marginTop: 10, width: 60, height: 6, backgroundColor: colors.line, borderRadius: 3 }, doorStyle]}
+            style={[
+              {
+                marginTop: 10,
+                width: 60,
+                height: 6,
+                backgroundColor: colors.line,
+                borderRadius: 3,
+              },
+              doorStyle,
+            ]}
           />
 
-          <Text style={{ color: colors.subtext, marginTop: 6 }}>Status: {status}</Text>
+          <Text style={{ color: colors.subtext, marginTop: 6 }}>
+            Status: {status}
+          </Text>
         </GlassCard>
       </Animated.View>
     </Pressable>

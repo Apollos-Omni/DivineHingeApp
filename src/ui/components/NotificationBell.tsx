@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   count: number;
@@ -23,17 +23,17 @@ export const NotificationBell: React.FC<Props> = ({ count, onPress }) => {
 const styles = StyleSheet.create({
   container: { padding: 8 },
   badge: {
-    position: 'absolute',
+    position: "absolute",
     top: 2,
     right: 2,
-    backgroundColor: '#FF3333',
+    backgroundColor: "#FF3333",
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 1,
   },
   badgeText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 12,
   },
 });

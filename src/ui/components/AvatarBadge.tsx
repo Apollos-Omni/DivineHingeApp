@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React from "react";
+import { View, Text, Image, StyleSheet } from "react-native";
 
 interface Props {
   avatarUrl?: string;
@@ -7,13 +7,22 @@ interface Props {
   displayName: string;
 }
 
-export const AvatarBadge: React.FC<Props> = ({ avatarUrl, karmaLevel, displayName }) => {
-  const auraColor = karmaLevel > 100 ? '#7FFF00' : karmaLevel > 50 ? '#FFD700' : '#AAA';
+export const AvatarBadge: React.FC<Props> = ({
+  avatarUrl,
+  karmaLevel,
+  displayName,
+}) => {
+  const auraColor =
+    karmaLevel > 100 ? "#7FFF00" : karmaLevel > 50 ? "#FFD700" : "#AAA";
 
   return (
     <View style={styles.container}>
       <Image
-        source={avatarUrl ? { uri: avatarUrl } : require('../../assets/backgrounds/images.png')}
+        source={
+          avatarUrl
+            ? { uri: avatarUrl }
+            : require("../../assets/backgrounds/images.png")
+        }
         style={[styles.avatar, { borderColor: auraColor }]}
       />
       <Text style={styles.name}>{displayName}</Text>
@@ -23,16 +32,16 @@ export const AvatarBadge: React.FC<Props> = ({ avatarUrl, karmaLevel, displayNam
 };
 
 const styles = StyleSheet.create({
-  container: { alignItems: 'center', margin: 8 },
+  container: { alignItems: "center", margin: 8 },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
     borderWidth: 3,
   },
-  name: { marginTop: 4, fontWeight: 'bold', color: '#FFF' },
+  name: { marginTop: 4, fontWeight: "bold", color: "#FFF" },
   aura: {
-    position: 'absolute',
+    position: "absolute",
     width: 80,
     height: 80,
     borderRadius: 40,

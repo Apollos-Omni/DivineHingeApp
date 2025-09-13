@@ -10,6 +10,6 @@ export interface MatchProfile {
 export interface HingeMatch {
   userId: string;
   matchId: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   timestamp: number;
 }

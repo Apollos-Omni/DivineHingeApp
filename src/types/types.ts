@@ -8,8 +8,8 @@ export interface User {
   karma_level: number;
   resilience_level: number;
   aura_level: number;
-  full_name?: string;      // from profiles table
-  avatar_url?: string;     // from profiles table
+  full_name?: string; // from profiles table
+  avatar_url?: string; // from profiles table
   created_at: string;
   updated_at: string;
 }
@@ -20,7 +20,7 @@ export interface Avatar {
   level: number;
   experience: number;
   unlocked_upgrades: string[];
-  is_active: boolean;       // added to match DB
+  is_active: boolean; // added to match DB
   created_at: string;
   updated_at: string;
 }
@@ -29,9 +29,9 @@ export interface HingeEvent {
   id: string;
   user_id: string;
   door_id: string;
-  action: 'open' | 'close';
-  status: 'locked' | 'unlocked';
-  timestamp: string;        // matches DB
+  action: "open" | "close";
+  status: "locked" | "unlocked";
+  timestamp: string; // matches DB
 }
 
 export interface KarmaRecord {
@@ -39,7 +39,7 @@ export interface KarmaRecord {
   user_id: string;
   value: number;
   reason?: string;
-  timestamp: string;        // matches DB
+  timestamp: string; // matches DB
 }
 
 export interface Notification {
@@ -64,7 +64,7 @@ export interface UserAura {
 export interface NeuralMirror {
   id: string;
   user_id: string;
-  state: any;               // JSON object
+  state: any; // JSON object
   created_at: string;
   updated_at: string;
 }
@@ -73,7 +73,7 @@ export interface VisionTrail {
   id: string;
   user_id: string;
   task: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: "pending" | "in_progress" | "completed";
   points: number;
   created_at: string;
   updated_at: string;

@@ -16,7 +16,8 @@
     "circular": "madge --circular src",
     "prune": "ts-prune --error",
     "doctor": "expo-doctor --verbose",
-    "deps:check": "depcheck"
+    "deps:check": "depcheck",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -70,6 +71,10 @@
   },
   "overrides": {
     "private": "true",
-    "license": "UNLICENSED"
+    "license": "UNLICENSED",
+    "@supabase/supabase-js": "^2.x",
+    "@supabase/postgrest-js": "^1.x",
+    "@supabase/storage-js": "^2.x",
+    "@supabase/functions-js": "^2.x"
   }
 }

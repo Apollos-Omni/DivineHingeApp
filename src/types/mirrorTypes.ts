@@ -1,4 +1,3 @@
-
 export interface NeuralMirror {
   id: string;
   userId: string;

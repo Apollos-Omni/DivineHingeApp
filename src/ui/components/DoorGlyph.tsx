@@ -1,29 +1,39 @@
-import React, { useMemo, useEffect } from 'react';
-import { Circle, G, Line, Rect } from 'react-native-svg';
+import React, { useMemo, useEffect } from "react";
+import { Circle, G, Line, Rect } from "react-native-svg";
 import Animated, {
   useSharedValue,
   useAnimatedProps,
   withRepeat,
   withTiming,
   Easing,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
 type Props = {
-  cx: number; cy: number;
+  cx: number;
+  cy: number;
   angle: number;
   width: number;
   thickness: number;
-  status: 'locked' | 'unlocked' | 'ajar';
+  status: "locked" | "unlocked" | "ajar";
 };
 
 const ARect = Animated.createAnimatedComponent(Rect);
 const ACircle = Animated.createAnimatedComponent(Circle);
 
-export default function DoorGlyph({ cx, cy, angle, width, thickness, status }: Props) {
+export default function DoorGlyph({
+  cx,
+  cy,
+  angle,
+  width,
+  thickness,
+  status,
+}: Props) {
   const color =
-    status === 'locked' ? '#ef4444' :
-    status === 'unlocked' ? '#22c55e' :
-    '#f59e0b';
+    status === "locked"
+      ? "#ef4444"
+      : status === "unlocked"
+        ? "#22c55e"
+        : "#f59e0b";
 
   // subtle pulse
   const pulse = useSharedValue(0.8);
@@ -32,14 +42,14 @@ export default function DoorGlyph({ cx, cy, angle, width, thickness, status }: P
     pulse.value = withRepeat(
       withTiming(1.0, { duration: 900, easing: Easing.inOut(Easing.ease) }),
       -1,
-      true
+      true,
     );
   }, [pulse]);
 
   const glowProps = useAnimatedProps(() => {
     return {
       opacity: pulse.value * 0.4 + 0.2,
-      r: (width * 1.4) * pulse.value,
+      r: width * 1.4 * pulse.value,
     };
   }, [pulse, width]);
 
