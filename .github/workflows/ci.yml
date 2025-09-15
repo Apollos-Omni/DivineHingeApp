@@ -18,7 +18,7 @@ env:
   NODE_VERSION: "20.19.2"
   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-  # Public runtime env (safe to ship to clients).
+  # Public runtime env (used only by local steps in this workflow)
   EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
   EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
   EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL }}
@@ -28,14 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Verify EXPO_TOKEN exists
-        run: |
-          if [ -z "${EXPO_TOKEN}" ]; then
-            echo "Missing EXPO_TOKEN secret."; exit 1
-          fi
+        with: { lfs: true }
 
       - name: Use Node ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
@@ -51,67 +44,19 @@ jobs:
           EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL=${EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL}
           EOF
 
-      - name: Install deps
-        run: npm ci
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npx expo-doctor --non-interactive || true
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Expo Doctor (non-interactive)
-        run: npx expo-doctor --non-interactive || true
-
-      - name: Summary
-        if: always()
-        run: |
-          {
-            echo "## Checks (Linux)";
-            echo "- Node: ${{ env.NODE_VERSION }}";
-            echo "- typecheck, lint done";
-          } >> $GITHUB_STEP_SUMMARY
-
-  checks-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      # Guard against rare git(128) on hosted Windows
-      - name: Git safe.directory + info
-        shell: pwsh
-        run: |
-          git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
-          git --version
-
-      - name: Use Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      - name: Generate .env for checks (Windows)
-        shell: pwsh
-        run: |
-          "EXPO_PUBLIC_SUPABASE_URL=$env:EXPO_PUBLIC_SUPABASE_URL`nEXPO_PUBLIC_SUPABASE_ANON_KEY=$env:EXPO_PUBLIC_SUPABASE_ANON_KEY`nEXPO_PUBLIC_SUPABASE_FUNCTIONS_URL=$env:EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL" | Out-File -FilePath .env -Encoding ascii
-
-      - name: Install deps
-        run: npm ci
-        shell: pwsh
-
-      - name: Typecheck
-        run: npm run typecheck
-        shell: pwsh
-
-      - name: Lint
-        run: npm run lint
-        shell: pwsh
+  # (Optional) keep Windows if you want, but it's slower and often flakier.
+  # checks-windows:
+  #   runs-on: windows-latest
+  #   steps: ...
 
   build-android-preview:
     name: EAS Build (Android preview)
-    needs: [checks-linux, checks-windows]
+    needs: [checks-linux] # add checks-windows if you keep it
     runs-on: ubuntu-latest
     if: >
       (github.event_name == 'push') ||
@@ -127,29 +72,29 @@ jobs:
 
       - run: npm ci
 
-      - uses: expo/expo-github-action@v8
+      - name: Setup Expo/EAS
+        uses: expo/expo-github-action@v8
         with:
           expo-version: latest
           eas-version: latest
           token: ${{ env.EXPO_TOKEN }}
 
-      # Env is already available from top-level 'env', so EAS picks it up.
-      - name: Trigger EAS build
-        id: eas
+      # Trigger build and capture the ID + web URL.
+      # NOTE: EAS Cloud env needs to be set on expo.dev (Environment: "preview").
+      - name: Trigger EAS Android build (preview)
+        id: trigger
         run: |
           set -e
-          JSON=$(eas build --platform android --profile preview --non-interactive --no-wait --json)
+          JSON=$(eas build --platform android --profile preview --non-interactive --json)
           echo "json=$JSON" >> $GITHUB_OUTPUT
-          URL=$(node -e "const a=JSON.parse(process.argv[1]); console.log(a[0].webUrl)" "$JSON")
-          echo "url=$URL" >> $GITHUB_OUTPUT
           echo "$JSON" > eas-android.json
+          ID=$(node -e "const a=JSON.parse(process.argv[1]); console.log(a[0].id)" "$JSON")
+          URL=$(node -e "const a=JSON.parse(process.argv[1]); console.log(a[0].webUrl)" "$JSON")
+          echo "id=$ID" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: eas-android-preview
-          path: eas-android.json
+      # Wait until the cloud build finishes
+      - name: Wait for completion
+        run: eas build:wait --build-id "${{ steps.trigger.outputs.id }}" --non-interactive
 
-      - name: Summarize
-        run: |
-          echo "## 📦 Android EAS Build" >> $GITHUB_STEP_SUMMARY
-          echo "- Link: ${{ steps.eas.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+      # Down
