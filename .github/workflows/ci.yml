@@ -1,195 +1,26 @@
-name: DivineHinge CI
+-- Table
+create table if not exists public.todos (
+  id bigint generated always as identity primary key,
+  title text not null,
+  is_complete boolean not null default false,
+  user_id uuid references auth.users(id) on delete cascade,
+  inserted_at timestamptz not null default now()
+);
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-    inputs:
-      platform:
-        description: Platform for EAS build
-        type: choice
-        default: android
-        options: [android, ios]
-      profile:
-        description: EAS profile
-        type: choice
-        default: preview
-        options: [development, preview, production]
-      wait:
-        description: Wait for EAS build to finish
-        type: boolean
-        default: false
+-- Row Level Security + dev-friendly policies
+alter table public.todos enable row level security;
 
-# Stop older runs for the same branch/PR
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+-- For quick testing: allow anyone to read (remove later for production)
+create policy "dev public read" on public.todos
+  for select using (true);
 
-permissions:
-  contents: read
-  pull-requests: write
+-- Authenticated users can insert/update their own rows
+create policy "user can insert own" on public.todos
+  for insert with check (auth.uid() = user_id or user_id is null);
 
-env:
-  # Keep CI and EAS aligned (your eas.json uses 20.19.2)
-  NODE_VERSION: "20.19.2"
-  # Prevent CLIs from going interactive
-  CI: true
-  EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+create policy "user can update own" on public.todos
+  for update using (auth.uid() = user_id);
 
-jobs:
-  checks-linux:
-    name: Checks (Linux)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      - name: Use Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-
-      # Optional: create .env for typecheck if your code reads EXPO_PUBLIC_ vars at build-time
-      - name: Generate .env
-        run: |
-          cat <<EOF > .env
-          EXPO_PUBLIC_SUPABASE_URL=${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
-          EOF
-
-      - name: Install deps (locked)
-        run: npm ci
-
-      - name: Set up Expo & EAS
-        uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ env.EXPO_TOKEN }}
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Expo Doctor
-        run: npx expo-doctor --non-interactive
-
-      - name: Summarize Checks
-        if: always()
-        run: |
-          {
-            echo "## ✅ Checks (Linux)";
-            echo "";
-            echo "- Node: ${{ env.NODE_VERSION }}";
-            echo "- npm ci, typecheck, lint, expo-doctor complete";
-          } >> $GITHUB_STEP_SUMMARY
-
-  # Minimal Windows check to catch path/PowerShell oddities you hit locally
-  checks-windows:
-    name: Checks (Windows)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-      - name: Install deps (locked)
-        run: npm ci
-        shell: pwsh
-      - name: Typecheck
-        run: npm run typecheck
-        shell: pwsh
-      - name: Lint
-        run: npm run lint
-        shell: pwsh
-
-  build-android-preview:
-    name: EAS Build (Android preview)
-    needs: [checks-linux, checks-windows]
-    runs-on: ubuntu-latest
-    # Don’t run cloud builds on forked PRs (no secrets there)
-    if: >
-      (github.event_name == 'push') ||
-      (github.event_name == 'workflow_dispatch') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-      - run: npm ci
-
-      - uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ env.EXPO_TOKEN }}
-
-      # Capture the build link and surface it in the PR summary
-      - name: Trigger EAS build (Android)
-        id: eas_android
-        run: |
-          JSON=$(eas build \
-            --platform android \
-            --profile ${{ github.event_name == 'workflow_dispatch' && inputs.profile || 'preview' }} \
-            ${{ github.event_name == 'workflow_dispatch' && (inputs.wait && '' || '--no-wait') || '--no-wait' }} \
-            --non-interactive \
-            --json)
-          echo "json=$JSON" >> $GITHUB_OUTPUT
-          node -e "const a=JSON.parse(process.env.JSON); console.log('ANDROID_URL='+a[0].webUrl)" >> $GITHUB_OUTPUT
-        env:
-          JSON: ""
-      - name: Add build link to job summary
-        run: |
-          echo "## 📦 Android EAS Build" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Link: ${{ steps.eas_android.outputs.ANDROID_URL }}" >> $GITHUB_STEP_SUMMARY
-
-  build-ios-preview:
-    name: EAS Build (iOS preview)
-    needs: [checks-linux, checks-windows]
-    runs-on: macos-latest
-    if: >
-      (github.event_name == 'push') ||
-      (github.event_name == 'workflow_dispatch') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false)
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "npm"
-      - run: npm ci
-
-      - uses: expo/expo-github-action@v8
-        with:
-          expo-version: latest
-          eas-version: latest
-          token: ${{ env.EXPO_TOKEN }}
-
-      - name: Trigger EAS build (iOS)
-        id: eas_ios
-        run: |
-          JSON=$(eas build \
-            --platform ios \
-            --profile ${{ github.event_name == 'workflow_dispatch' && inputs.profile || 'preview' }} \
-            ${{ github.event_name == 'workflow_dispatch' && (inputs.wait && '' || '--no-wait') || '--no-wait' }} \
-            --non-interactive \
-            --json)
-          echo "json=$JSON" >> $GITHUB_OUTPUT
-          node -e "const a=JSON.parse(process.env.JSON); console.log('IOS_URL='+a[0].webUrl)" >> $GITHUB_OUTPUT
-        env:
-          JSON: ""
-      - name: Add build link to job summary
-        run: |
-          echo "## 🍎 iOS EAS Build" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Link: ${{ steps.eas_ios.outputs.IOS_URL }}" >> $GITHUB_STEP_SUMMARY
+-- Seed a couple rows so your UI shows something
+insert into public.todos (title) values
+  ('Build OAuth login'), ('Wire up first screen');
