@@ -14,6 +14,9 @@ import { useDeviceState } from "../../state/deviceState";
 import { useAuth } from "../../auth/AuthProvider";
 import { getProfile /*, updateProfile*/ } from "../../services/functions";
 
+// ⬇️ Door Health card (Edge Function-backed)
+import DoorHealthCard from "../features/door/DoorHealthCard";
+
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation<any>(); // or your typed RootStack param list
   const { devices, lockAll, unlockAll } = useDeviceState();
@@ -33,7 +36,7 @@ export const HomeScreen: React.FC = () => {
     })();
   }, []);
 
-  const anyUnlocked = devices.some((d: { isLocked: any }) => !d.isLocked);
+  const anyUnlocked = devices.some((d: { isLocked: boolean }) => !d.isLocked);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -68,12 +71,24 @@ export const HomeScreen: React.FC = () => {
       </LinearGradient>
 
       <View style={styles.panel}>
+        {/* Door Health (Edge Function-backed) */}
+        <View style={{ marginBottom: 16 }}>
+          {/* Without deviceId → shows most recent device for the signed-in user */}
+          <DoorHealthCard />
+          {/*
+            Or, when you have a specific id from your state:
+            <DoorHealthCard deviceId={devices[0]?.id} />
+          */}
+        </View>
+
         <Text style={styles.panelTitle}>Status</Text>
         <Text style={styles.panelSub}>
           {devices.length === 0
             ? "No doors linked yet."
-            : `${devices.length} door${devices.length > 1 ? "s" : ""} • ${devices.filter((d: { isLocked: any }) => d.isLocked).length} locked / ${
-                devices.filter((d: { isLocked: any }) => !d.isLocked).length
+            : `${devices.length} door${devices.length > 1 ? "s" : ""} • ${
+                devices.filter((d: { isLocked: boolean }) => d.isLocked).length
+              } locked / ${
+                devices.filter((d: { isLocked: boolean }) => !d.isLocked).length
               } unlocked`}
         </Text>
 
@@ -86,7 +101,7 @@ export const HomeScreen: React.FC = () => {
             <Text style={styles.tileSub}>Add, rename, manage</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+        <TouchableOpacity
             style={styles.tile}
             onPress={() => navigation.navigate("Settings")}
           >

@@ -1,0 +1,43 @@
+name: AI Orchestrator
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task for the AI'
+        required: true
+        default: 'Scan repo and suggest initial cleanup PR'
+  issue_comment:
+    types: [created]
+
+jobs:
+  run:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, '/ai-run'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install orchestrator
+        run: |
+          cd ai
+          npm ci
+          npm run build
+      - name: Run orchestrator
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPO_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO_NAME: ${{ github.event.repository.name }}
+          REPO_LOCAL_PATH: ${{ github.workspace }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+        run: |
+          node ai/dist/index.js --task "${{ github.event.inputs.task || github.event.comment.body }}"

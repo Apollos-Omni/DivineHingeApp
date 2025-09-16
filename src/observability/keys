@@ -1,0 +1,46 @@
+// gihub - supabase
+otpauth://totp/Auth0:nck.phlps85%40gmail.com?enrollment_tx_id=g9u3ZW8rynTsCRemy8VKYfXTKaktqU7U&base_url=https%3A%2F%2Fauth0.guardian.auth0.com
+
+// Auth0 - Github
+W35CT7WEXCAG7NH7N3SPVBW6
+
+Client Secret - e3cbc1dc24c6289d89a8042c2f3b72a982d70f8d
+
+Client ID
+Ov23lirVCjQfOsadKnnu
+
+EXPO_TOKEN - DivineHingeApp
+qAVdb6MiWohdyPh2oiXk4zwCeZczS2E1WjUlG6lS
+
+GitHub App - @Apollos-Omni - DivineHingeApp
+0ECUPyvTU6q5FKrMnrb8gzMZFfEeiBamagVBmtpS
+
+GitHub App - Robot - DivineHingeApp
+# 1) Download the zip from our chat, then:
+$zip = "$HOME\Downloads\ai-orchestrator-starter.zip"   # adjust if you saved elsewhere
+$dest = "C:\users\phelp\documents\divinehingeapp"
+Expand-Archive -Path $zip -DestinationPath $dest -Force
+
+# 2) Optional but recommended: commit the new folders
+cd $dest
+git add ai .github supabase
+git commit -m "Add AI Orchestrator starter (ai/, CI, supabase function)"
+
+
+EXPO_TOKEN - EXPO_TOKEN
+MNZhO-6bkEZH7zPJN_5KAcGz58L7Cq8ig9DvbRzn
+
+Owned by: @Apollos-Omni
+
+App ID: 1958510
+
+Using your App ID to get installation tokens? You can now use your Client ID instead.
+
+Client ID: Iv23li2YBq0r9UzVeyBQ
+
+Github Client Secret
+76ceb938f9ed04a5d0ae156fa75a1b48b3ce438b
+
+GitHub - Private key
+SHA256:jdeNZX0jYIoXPz+Pw6jehJ10qAjT41l4OfyvpVFy1TU=
+Added now by Apollos-Omni

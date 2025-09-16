@@ -1,0 +1,34 @@
+DivineHingeApp – suggested fixes
+
+1) Unify Supabase env vars:
+   - Use EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY everywhere.
+   - .env/.env.local adjusted accordingly.
+   - Ensure the values match your Supabase project:
+       EXPO_PUBLIC_SUPABASE_URL=https://rjsdcotamifcjialnqze.supabase.co
+       EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_pub_xxx
+
+2) Single supabase client:
+   - src/database/dbClient.ts now re-exports the configured client from src/lib/supabaseClient.ts
+   - This avoids duplicate env names and ensures RN storage/pkce settings are used consistently.
+
+3) Edge Function base URL:
+   - superResponder.ts now derives the functions base from env:
+       EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL=https://rjsdcotamifcjialnqze.supabase.co/functions/v1
+     or falls back to ${EXPO_PUBLIC_SUPABASE_URL}/functions/v1
+
+4) Supabase Auth redirect URIs to add (Authentication → URL Configuration → Redirect URLs):
+   - divinehinge://auth/callback                                    (native)
+   - exp://127.0.0.1:19000/--/auth/callback                         (Expo Go on localhost)
+   - exp://<your-LAN-IP>:19000/--/auth/callback                     (Expo Go on LAN)
+   - https://auth.expo.dev/@<your-expo-username>/divinehingeapp     (EAS builds)
+
+   If using custom development clients, also add:
+   - com.yourcompany.divinehinge://auth/callback (replace with your bundle id / app id)
+
+5) After applying:
+   - npm i
+   - npx expo-doctor --fix
+   - npx expo start -c
+   - Test GitHub login in Expo Go (use QR), verify it returns to the app.
+
+Security note: Don’t commit .env with keys to Git; use EAS secrets for production builds.
