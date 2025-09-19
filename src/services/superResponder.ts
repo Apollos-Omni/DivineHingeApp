@@ -7,7 +7,7 @@ export async function callSuperResponder(input: string) {
   // const token = session?.access_token;
 
   const res = await fetch(
-    "https://rjsdcotamifcjialnqze.supabase.co/functions/v1/super-responder",
+    (process.env.EXPO_PUBLIC_SUPABASE_FUNCTIONS_URL || `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1`)+"/super-responder",
     {
       method: "POST",
       headers: {

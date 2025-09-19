@@ -59,3 +59,7 @@ node_modules
 
 .eas-archive/
 
+node_modules/
+dist/
+*.log
+.env

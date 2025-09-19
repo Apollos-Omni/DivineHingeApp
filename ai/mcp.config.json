@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "${MCP_GITHUB_BASE_URL}",
+      "accessToken": "${MCP_GITHUB_ACCESS_TOKEN}"
+    },
+    "supabase": {
+      "type": "remote",
+      "url": "${MCP_SUPABASE_SERVER_URL}",
+      "apiKey": "${MCP_SUPABASE_API_KEY}"
+    }
+  }
+}

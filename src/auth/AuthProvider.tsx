@@ -1,11 +1,6 @@
 // src/auth/AuthProvider.tsx
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import * as Linking from "expo-linking";
 import { supabase } from "../lib/supabaseClient";
 
 type AuthCtx = {
@@ -17,67 +12,80 @@ type AuthCtx = {
   logout: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthCtx | undefined>(undefined);
+const AuthContext = createContext<AuthCtx | null>(null);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
-  const [session, setSession] = useState<any | null>(null);
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<any | null>(null);
+  const [session, setSession] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Initial session + subscription (Supabase v2; cast to any to avoid TS drift)
   useEffect(() => {
-    let mounted = true;
+    let isMounted = true;
 
     (async () => {
       try {
-        const { data } = await (supabase.auth as any).getSession();
-        if (!mounted) return;
-        const s = data?.session ?? null;
-        setSession(s);
-        setUser(s?.user ?? null);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        setSession(session);
+        setUser(session?.user ?? null);
       } finally {
-        if (mounted) setLoading(false);
+        if (isMounted) setLoading(false);
       }
     })();
 
-    const { data: sub } = (supabase.auth as any).onAuthStateChange(
-      (_evt: any, payload: any) => {
-        const s = payload?.session ?? null;
-        setSession(s);
-        setUser(s?.user ?? null);
-      },
-    );
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
 
-    return () => sub?.subscription?.unsubscribe?.();
+    // Deep link handler to finish PKCE/Magic Link exchange on native
+    const handleUrl = async (url: string) => {
+      try {
+        const { error } = await supabase.auth.exchangeCodeForSession(url);
+        if (error) {
+          console.warn("exchangeCodeForSession error:", error.message);
+        }
+      } catch (e) {
+        console.warn("exchangeCodeForSession threw:", e);
+      }
+    };
+
+    const urlListener = ({ url }: { url: string }) => handleUrl(url);
+    const subLink = Linking.addEventListener("url", urlListener);
+
+    // Handle cold start (app opened from a link)
+    (async () => {
+      const initialUrl = await Linking.getInitialURL();
+      if (initialUrl) await handleUrl(initialUrl);
+    })();
+
+    return () => {
+      isMounted = false;
+      sub.subscription.unsubscribe();
+      // @ts-ignore RN/Expo types differ on remove()
+      subLink.remove?.();
+    };
   }, []);
 
-  const login: AuthCtx["login"] = async (email, password) => {
-    const { error } = await (supabase.auth as any).signInWithPassword({
-      email,
-      password,
-    });
-    return { error: error?.message };
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+    return {};
   };
 
-  const register: AuthCtx["register"] = async (email, password) => {
-    const { error } = await (supabase.auth as any).signUp({ email, password });
-    return { error: error?.message };
+  const register = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) return { error: error.message };
+    return {};
   };
 
   const logout = async () => {
-    const auth: any = (supabase as any).auth;
-    if (typeof auth.signOut === "function") {
-      await auth.signOut(); // v2
-    } else if (typeof auth.signout === "function") {
-      await auth.signout(); // ultra-legacy fallback
-    }
+    await supabase.auth.signOut();
   };
 
   const value = useMemo(
     () => ({ user, session, loading, login, register, logout }),
-    [user, session, loading],
+    [user, session, loading]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,0 +1,11 @@
+﻿{
+    "Domain":  null,
+    "ExpoProxy":  "https://auth.expo.io/@apollosdesigns/",
+    "NativeAppId":  null,
+    "NativeCallbacks":  null,
+    "WebAppId":  null,
+    "WebCallbacks":  null,
+    "WebOrigins":  null,
+    "AllowedCORS":  null,
+    "CrossOriginLoc":  null
+}
