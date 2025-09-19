@@ -1,0 +1,85 @@
+# .github/dependabot.yml
+version: 2
+updates:
+  # ── JavaScript/TypeScript (npm/pnpm/yarn) ────────────────────────────
+  - package-ecosystem: "npm"        # or: "pnpm" / "yarn"
+    directory: "/"                  # root package.json
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 10
+    rebase-strategy: "auto"
+    versioning-strategy: "auto"
+    groups:
+      types:
+        patterns: ["@types/*", "typescript", "ts-node"]
+      testing:
+        patterns: ["vitest", "@vitest/*", "jest", "@jest/*"]
+      react-native-core:
+        patterns: ["react", "react-native", "expo", "expo-*", "@expo/*"]
+      tooling:
+        patterns: ["eslint*", "@eslint/*", "prettier", "*-loader", "webpack*", "babel*"]
+      supabase:
+        patterns: ["@supabase/*", "supabase", "postgrest*"]
+    ignore:
+      # Example: keep major Expo pinned until you’re ready
+      - dependency-name: "expo"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions workflows ─────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:15"
+      timezone: "America/New_York"
+    groups:
+      gh-actions:
+        patterns: ["*"]
+
+  # ── Android (Gradle) ────────────────────────────────────────────────
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+      timezone: "America/New_York"
+    open-pull-requests-limit: 5
+    groups:
+      android-build:
+        patterns: ["com.android.*", "org.jetbrains.kotlin*", "androidx.*", "com.facebook.react*"]
+      testing:
+        patterns: ["junit*", "androidx.test*", "mockito*", "kotest*"]
+
+  # ── iOS (CocoaPods) – include only if you have /ios/Podfile ─────────
+  - package-ecosystem: "bundler"    # CocoaPods is managed via Ruby's Bundler when Podfile.lock is checked in
+    directory: "/ios"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:45"
+      timezone: "America/New_York"
+    # If you use plain CocoaPods without Bundler, swap to:
+    # package-ecosystem: "cocoapods"
+
+  # ── Docker – include if you have a Dockerfile ───────────────────────
+  # - package-ecosystem: "docker"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #     time: "10:00"
+  #     timezone: "America/New_York"
+
+  # ── Python – include if you have backend scripts/CI helpers ─────────
+  # - package-ecosystem: "pip"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"
+  #     day: "monday"
+  #     time: "10:15"
+  #     timezone: "America/New_York"
