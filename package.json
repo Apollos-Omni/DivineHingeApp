@@ -98,7 +98,7 @@
         "react-dom": "^18.2.0",
         "react-native-dotenv": "^3.4.11",
         "react-native-svg-transformer": "^1.5.1",
-        "react-test-renderer": "^18.2.0",
+        "react-test-renderer": "^19.1.1",
         "sort-package-json": "^3.4.0",
         "ts-node": "^10.9.2",
         "ts-prune": "^0.10.3",
