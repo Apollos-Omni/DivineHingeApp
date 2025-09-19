@@ -39,7 +39,7 @@
     },
     "dependencies": {
         "@auth0/auth0-spa-js": "^2.4.1",
-        "@logrocket/react-native": "^1.57.0",
+        "@logrocket/react-native": "^1.57.1",
         "@react-native-async-storage/async-storage": "1.23.1",
         "@react-navigation/native": "^6.1.18",
         "@react-navigation/native-stack": "^6.11.0",
