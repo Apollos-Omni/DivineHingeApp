@@ -95,7 +95,7 @@
         "madge": "^7.0.0",
         "patch-package": "^8.0.0",
         "prettier": "^3.6.2",
-        "react-dom": "^18.2.0",
+        "react-dom": "^19.1.1",
         "react-native-dotenv": "^3.4.11",
         "react-native-svg-transformer": "^1.5.1",
         "react-test-renderer": "^18.2.0",
